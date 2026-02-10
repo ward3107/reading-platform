@@ -1,8 +1,14 @@
 import { useState } from 'react';
+import type { Teacher } from '../../types';
 
-function SettingsPage({ teacher, onRefresh }) {
-  const [activeTab, setActiveTab] = useState('profile');
-  const [saving, setSaving] = useState(false);
+interface SettingsPageProps {
+  teacher: Teacher;
+  onRefresh: () => void;
+}
+
+function SettingsPage({ teacher, onRefresh }: SettingsPageProps) {
+  const [activeTab, setActiveTab] = useState<string>('profile');
+  const [saving, setSaving] = useState<boolean>(false);
 
   const handleSave = async () => {
     setSaving(true);
@@ -60,12 +66,25 @@ function SettingsPage({ teacher, onRefresh }) {
 }
 
 // Profile Settings Component
-function ProfileSettings({ teacher, onSave, saving }) {
-  const [formData, setFormData] = useState({
+interface ProfileSettingsProps {
+  teacher: Teacher;
+  onSave: () => void;
+  saving: boolean;
+}
+
+interface ProfileFormData {
+  name: string;
+  email: string;
+  school: string;
+  phone: string;
+}
+
+function ProfileSettings({ teacher, onSave, saving }: ProfileSettingsProps) {
+  const [formData, setFormData] = useState<ProfileFormData>({
     name: teacher?.name || '',
     email: teacher?.email || '',
     school: teacher?.school || '',
-    phone: teacher?.phone || ''
+    phone: (teacher as any)?.phone || ''
   });
 
   return (
@@ -138,8 +157,21 @@ function ProfileSettings({ teacher, onSave, saving }) {
 }
 
 // Notification Settings Component
-function NotificationSettings({ onSave, saving }) {
-  const [settings, setSettings] = useState({
+interface NotificationSettingsProps {
+  onSave: () => void;
+  saving: boolean;
+}
+
+interface NotificationSettingsData {
+  emailNotifications: boolean;
+  missionCompletion: boolean;
+  weeklyReport: boolean;
+  studentProgress: boolean;
+  newStudent: boolean;
+}
+
+function NotificationSettings({ onSave, saving }: NotificationSettingsProps) {
+  const [settings, setSettings] = useState<NotificationSettingsData>({
     emailNotifications: true,
     missionCompletion: true,
     weeklyReport: true,
@@ -147,7 +179,7 @@ function NotificationSettings({ onSave, saving }) {
     newStudent: true
   });
 
-  const toggleSetting = (key) => {
+  const toggleSetting = (key: keyof NotificationSettingsData) => {
     setSettings({ ...settings, [key]: !settings[key] });
   };
 
@@ -158,11 +190,11 @@ function NotificationSettings({ onSave, saving }) {
       </h3>
 
       {[
-        { key: 'emailNotifications', label: 'התראות דוא״ל', labelEn: 'Email Notifications' },
-        { key: 'missionCompletion', label: 'השלמת משימות', labelEn: 'Mission Completion' },
-        { key: 'weeklyReport', label: 'דוח שבועי', labelEn: 'Weekly Report' },
-        { key: 'studentProgress', label: 'התקדמות תלמידים', labelEn: 'Student Progress' },
-        { key: 'newStudent', label: 'תלמידים חדשים', labelEn: 'New Students' }
+        { key: 'emailNotifications' as const, label: 'התראות דוא״ל', labelEn: 'Email Notifications' },
+        { key: 'missionCompletion' as const, label: 'השלמת משימות', labelEn: 'Mission Completion' },
+        { key: 'weeklyReport' as const, label: 'דוח שבועי', labelEn: 'Weekly Report' },
+        { key: 'studentProgress' as const, label: 'התקדמות תלמידים', labelEn: 'Student Progress' },
+        { key: 'newStudent' as const, label: 'תלמידים חדשים', labelEn: 'New Students' }
       ].map(setting => (
         <div
           key={setting.key}
@@ -201,8 +233,21 @@ function NotificationSettings({ onSave, saving }) {
 }
 
 // Mission Settings Component
-function MissionSettings({ onSave, saving }) {
-  const [settings, setSettings] = useState({
+interface MissionSettingsProps {
+  onSave: () => void;
+  saving: boolean;
+}
+
+interface MissionSettingsData {
+  defaultPoints: number;
+  defaultStories: number;
+  autoAssign: boolean;
+  difficultyLevel: string;
+  missionDuration: number;
+}
+
+function MissionSettings({ onSave, saving }: MissionSettingsProps) {
+  const [settings, setSettings] = useState<MissionSettingsData>({
     defaultPoints: 100,
     defaultStories: 3,
     autoAssign: false,
@@ -294,7 +339,13 @@ function MissionSettings({ onSave, saving }) {
 }
 
 // Account Settings Component
-function AccountSettings({ teacher, onSave, saving }) {
+interface AccountSettingsProps {
+  teacher: Teacher;
+  onSave: () => void;
+  saving: boolean;
+}
+
+function AccountSettings({ teacher, onSave, saving }: AccountSettingsProps) {
   return (
     <div className="max-w-2xl space-y-6">
       <h3 className="text-lg font-semibold text-gray-800 mb-4">
@@ -332,7 +383,7 @@ function AccountSettings({ teacher, onSave, saving }) {
           חשבון נוצר בתאריך: / Account created:
         </p>
         <p className="text-xs text-gray-500">
-          {teacher?.createdAt?.toDate?.()?.toLocaleDateString('he-IL') || 'N/A'}
+          {(teacher as any)?.createdAt?.toDate?.()?.toLocaleDateString('he-IL') || 'N/A'}
         </p>
       </div>
     </div>

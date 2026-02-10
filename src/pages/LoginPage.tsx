@@ -1,21 +1,32 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-function LoginPage({ defaultMode = null }) {
-  const [mode, setMode] = useState(defaultMode || 'select');
-  const [formData, setFormData] = useState({
+interface LoginPageProps {
+  defaultMode?: 'teacher' | 'student' | null;
+}
+
+interface FormData {
+  email: string;
+  password: string;
+  classCode: string;
+  studentId: string;
+}
+
+function LoginPage({ defaultMode = null }: LoginPageProps) {
+  const [mode, setMode] = useState<'select' | 'teacher' | 'student'>(defaultMode || 'select');
+  const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
     classCode: '',
     studentId: ''
   });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
   const { signInAsTeacher, signInAsStudent } = useAuth();
   const navigate = useNavigate();
 
-  const handleTeacherLogin = async (e) => {
+  const handleTeacherLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -25,12 +36,12 @@ function LoginPage({ defaultMode = null }) {
     if (result.success) {
       navigate('/teacher');
     } else {
-      setError(result.error);
+      setError(result.error || 'Login failed');
       setLoading(false);
     }
   };
 
-  const handleStudentLogin = async (e) => {
+  const handleStudentLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -40,7 +51,7 @@ function LoginPage({ defaultMode = null }) {
     if (result.success) {
       navigate('/student');
     } else {
-      setError(result.error);
+      setError(result.error || 'Login failed');
       setLoading(false);
     }
   };
@@ -278,6 +289,8 @@ function LoginPage({ defaultMode = null }) {
       </div>
     );
   }
+
+  return null;
 }
 
 export default LoginPage;

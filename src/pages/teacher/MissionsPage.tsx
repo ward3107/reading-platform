@@ -1,13 +1,40 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
+import type { Class } from '../../types';
 
-function MissionsPage({ classes, onRefresh }) {
-  const [selectedClassId, setSelectedClassId] = useState(classes[0]?.id || '');
-  const [showCreateModal, setShowCreateModal] = useState(false);
+interface MissionsPageProps {
+  classes: Class[];
+  onRefresh: () => void;
+}
+
+interface CreateMissionFormData {
+  title: string;
+  titleEn: string;
+  type: string;
+  targetStories: number;
+  points: number;
+  difficulty: string;
+}
+
+interface Mission {
+  id: string;
+  title: string;
+  titleEn: string;
+  type: string;
+  targetStories: number;
+  points: number;
+  status: string;
+  assignedTo: number;
+  completedBy: number;
+}
+
+function MissionsPage({ classes, onRefresh }: MissionsPageProps) {
+  const [selectedClassId, setSelectedClassId] = useState<string>(classes[0]?.id || '');
+  const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
 
   const selectedClass = classes.find(c => c.id === selectedClassId);
 
   // Mock missions data - would come from Firestore
-  const missions = [
+  const missions: Mission[] = [
     {
       id: 'mission_1',
       title: 'משימת קריאה יומית',
@@ -139,7 +166,11 @@ function MissionsPage({ classes, onRefresh }) {
 }
 
 // Mission Card Component
-function MissionCard({ mission }) {
+interface MissionCardProps {
+  mission: Mission;
+}
+
+function MissionCard({ mission }: MissionCardProps) {
   const completionRate = mission.assignedTo > 0
     ? Math.round((mission.completedBy / mission.assignedTo) * 100)
     : 0;
@@ -198,8 +229,14 @@ function MissionCard({ mission }) {
 }
 
 // Create Mission Modal Component
-function CreateMissionModal({ classId, onClose, onCreated }) {
-  const [formData, setFormData] = useState({
+interface CreateMissionModalProps {
+  classId: string;
+  onClose: () => void;
+  onCreated: () => void;
+}
+
+function CreateMissionModal({ classId, onClose, onCreated }: CreateMissionModalProps) {
+  const [formData, setFormData] = useState<CreateMissionFormData>({
     title: '',
     titleEn: '',
     type: 'reading',
@@ -208,7 +245,7 @@ function CreateMissionModal({ classId, onClose, onCreated }) {
     difficulty: 'medium'
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Would call createMission function here
     onCreated();

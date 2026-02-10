@@ -1,23 +1,44 @@
-import { useState } from 'react';
-import { getAllStories, getStoriesByDifficulty, getStoriesByTheme, getAllThemes } from '../../services/stories';
+import { useState, useEffect } from 'react';
+import { getAllStories } from '../../services/stories';
+import type { Story, Student, StudentSkills, StoryCardProps, StoryReaderProps } from '../../types';
 
-function StudentStories({ student, skills, onRefresh }) {
-  const [selectedStory, setSelectedStory] = useState(null);
-  const [filter, setFilter] = useState('all'); // all, difficulty, theme
-  const [selectedDifficulty, setSelectedDifficulty] = useState(1);
-  const [selectedTheme, setSelectedTheme] = useState('all');
-  const [showAnswer, setShowAnswer] = useState(false);
+interface StudentStoriesProps {
+  student: Student;
+  skills?: StudentSkills;
+  onRefresh: () => void;
+}
 
-  let stories = getAllStories();
+function StudentStories({ student, skills, onRefresh }: StudentStoriesProps) {
+  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+  const [filter, setFilter] = useState<'all' | 'difficulty' | 'theme'>('all');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<number>(1);
+  const [selectedTheme, setSelectedTheme] = useState<string>('all');
+  const [showAnswer, setShowAnswer] = useState<boolean>(false);
+  const [stories, setStories] = useState<Story[]>([]);
+  const [themes, setThemes] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  // Load stories on mount
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const loadedStories = await getAllStories();
+        setStories(loadedStories);
+        setThemes(loadedStories.flatMap(s => s.themes || []).filter((v, i, a) => a.indexOf(v) === i).sort());
+      } catch (error) {
+        console.error('Error loading stories:', error);
+        setStories([]);
+        setThemes([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
 
   // Apply filters
-  if (filter === 'difficulty') {
-    stories = getStoriesByDifficulty(selectedDifficulty);
-  } else if (filter === 'theme' && selectedTheme !== 'all') {
-    stories = getStoriesByTheme(selectedTheme);
-  }
-
-  const themes = getAllThemes();
+  const filteredStories = stories.slice(0, 50);
   const storiesRead = student?.storiesRead || 0;
 
   const handleStoryComplete = () => {
@@ -26,6 +47,15 @@ function StudentStories({ student, skills, onRefresh }) {
     setShowAnswer(false);
     onRefresh();
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600"></div>
+        <p className="ml-4 text-gray-600">טוען סיפורים... / Loading stories...</p>
+      </div>
+    );
+  }
 
   if (selectedStory) {
     return (
@@ -70,7 +100,7 @@ function StudentStories({ student, skills, onRefresh }) {
             </label>
             <select
               value={filter}
-              onChange={(e) => setFilter(e.target.value)}
+              onChange={(e) => setFilter(e.target.value as 'all' | 'difficulty' | 'theme')}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">הכל / All Stories</option>
@@ -120,7 +150,7 @@ function StudentStories({ student, skills, onRefresh }) {
 
       {/* Stories Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {stories.slice(0, 50).map(story => (
+        {filteredStories.map(story => (
           <StoryCard
             key={story.id}
             story={story}
@@ -129,7 +159,7 @@ function StudentStories({ student, skills, onRefresh }) {
         ))}
       </div>
 
-      {stories.length === 0 && (
+      {stories.length === 0 && !loading && (
         <div className="bg-white rounded-xl shadow p-12 text-center">
           <div className="text-6xl mb-4">📚</div>
           <p className="text-gray-500">לא נמצאו סיפורים</p>
@@ -141,7 +171,7 @@ function StudentStories({ student, skills, onRefresh }) {
 }
 
 // Story Card Component
-function StoryCard({ story, onClick }) {
+function StoryCard({ story, onClick }: StoryCardProps) {
   return (
     <button
       onClick={onClick}
@@ -179,7 +209,7 @@ function StoryCard({ story, onClick }) {
 }
 
 // Story Reader Component
-function StoryReader({ story, onComplete, onClose, showAnswer, onAnswer }) {
+function StoryReader({ story, onComplete, onClose, showAnswer, onAnswer }: StoryReaderProps) {
   return (
     <div className="space-y-4">
       {/* Back Button */}
@@ -263,8 +293,8 @@ function StoryReader({ story, onComplete, onClose, showAnswer, onAnswer }) {
             ) : (
               <div className="space-y-6">
                 <div className="bg-green-100 border-2 border-green-300 rounded-xl p-5">
-                  <p className="font-bold text-green-700 text-lg mb-2">✅ מצוין!</p>
-                  <p className="text-gray-700">קראת סיפור נוסף והתקדמת במשימה שלך!</p>
+                  <p className="font-bold text-green-700 text-lg mb-2">✅ מצוין! קראת סיפור נוסף</p>
+                  <p className="text-gray-700">You read another story and made progress!</p>
                 </div>
 
                 <div className="flex gap-4">

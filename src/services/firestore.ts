@@ -16,6 +16,107 @@ import {
   runTransaction
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import type {
+  Teacher,
+  Student,
+  Class,
+  StudentSkills
+} from '../types';
+
+// ============= DEMO MODE CHECK =============
+let isDemoMode = false;
+
+// Check if Firebase is properly configured
+try {
+  if (!db || !db.app) {
+    isDemoMode = true;
+  }
+} catch (e) {
+  isDemoMode = true;
+}
+
+// Demo data
+const demoClasses: Class[] = [
+  {
+    id: 'demo_class_1',
+    name: 'כיתה א׳',
+    nameEn: 'Class A',
+    grade: '7',
+    teacherId: 'demo_teacher',
+    studentCount: 3,
+    isActive: true,
+    analytics: {
+      totalStudents: 3,
+      avgReadingLevel: 2.3,
+      totalPoints: 450,
+      activeStudents: 3
+    }
+  }
+];
+
+const demoStudents: Student[] = [
+  {
+    id: 'demo_student_1',
+    name: 'דניאל כהן',
+    studentId: '12345',
+    classId: 'demo_class_1',
+    totalPoints: 150,
+    currentLevel: 2,
+    storiesRead: 12,
+    missionsCompleted: 3,
+    isActive: true
+  },
+  {
+    id: 'demo_student_2',
+    name: 'מאיה לוי',
+    studentId: '12346',
+    classId: 'demo_class_1',
+    totalPoints: 200,
+    currentLevel: 3,
+    storiesRead: 18,
+    missionsCompleted: 5,
+    isActive: true
+  },
+  {
+    id: 'demo_student_3',
+    name: 'יוסי אברהם',
+    studentId: '12347',
+    classId: 'demo_class_1',
+    totalPoints: 100,
+    currentLevel: 1,
+    storiesRead: 8,
+    missionsCompleted: 2,
+    isActive: true
+  }
+];
+
+interface DemoMission {
+  id: string;
+  title: string;
+  titleEn: string;
+  type: string;
+  targetStories: number;
+  points: number;
+  status: string;
+  progress: number;
+  assignedTo: number;
+  completedBy: number;
+}
+
+const demoMissions: DemoMission[] = [
+  {
+    id: 'demo_mission_1',
+    title: 'משימת קריאה יומית',
+    titleEn: 'Daily Reading Mission',
+    type: 'reading',
+    targetStories: 3,
+    points: 100,
+    status: 'in_progress',
+    progress: 33,
+    assignedTo: 3,
+    completedBy: 1
+  }
+];
 
 // ============= COLLECTION NAMES =============
 const COLLECTIONS = {
@@ -29,11 +130,11 @@ const COLLECTIONS = {
   TEACHER_STATS: 'teacher_stats',
   CONTENT_CACHE: 'content_cache',
   PENDING_SYNC: 'pending_sync'
-};
+} as const;
 
 // ============= TEACHER OPERATIONS =============
 
-export async function createTeacher(teacherData) {
+export async function createTeacher(teacherData: Omit<Teacher, 'id'>): Promise<string> {
   const teacherRef = await addDoc(collection(db, COLLECTIONS.TEACHERS), {
     ...teacherData,
     createdAt: serverTimestamp(),
@@ -53,18 +154,18 @@ export async function createTeacher(teacherData) {
   return teacherRef.id;
 }
 
-export async function getTeacherByEmail(email) {
+export async function getTeacherByEmail(email: string): Promise<Teacher | null> {
   const q = query(
     collection(db, COLLECTIONS.TEACHERS),
     where('email', '==', email)
   );
   const snapshot = await getDocs(q);
   if (snapshot.empty) return null;
-  const doc = snapshot.docs[0];
-  return { id: doc.id, ...doc.data() };
+  const docSnapshot = snapshot.docs[0];
+  return { id: docSnapshot.id, ...docSnapshot.data() } as Teacher;
 }
 
-export async function updateTeacher(teacherId, updates) {
+export async function updateTeacher(teacherId: string, updates: Partial<Teacher>): Promise<void> {
   const teacherRef = doc(db, COLLECTIONS.TEACHERS, teacherId);
   await updateDoc(teacherRef, {
     ...updates,
@@ -74,7 +175,7 @@ export async function updateTeacher(teacherId, updates) {
 
 // ============= CLASS OPERATIONS =============
 
-export async function createClass(teacherId, classData) {
+export async function createClass(teacherId: string, classData: Omit<Class, 'id' | 'teacherId'>): Promise<string> {
   const classRef = await addDoc(collection(db, COLLECTIONS.CLASSES), {
     ...classData,
     teacherId,
@@ -90,7 +191,10 @@ export async function createClass(teacherId, classData) {
   return classRef.id;
 }
 
-export async function getClassesByTeacher(teacherId) {
+export async function getClassesByTeacher(teacherId: string): Promise<Class[]> {
+  if (isDemoMode) {
+    return demoClasses;
+  }
   const q = query(
     collection(db, COLLECTIONS.CLASSES),
     where('teacherId', '==', teacherId),
@@ -98,10 +202,10 @@ export async function getClassesByTeacher(teacherId) {
     orderBy('name', 'asc')
   );
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Class[];
 }
 
-export async function updateClass(classId, updates) {
+export async function updateClass(classId: string, updates: Partial<Class>): Promise<void> {
   const classRef = doc(db, COLLECTIONS.CLASSES, classId);
   await updateDoc(classRef, {
     ...updates,
@@ -109,7 +213,7 @@ export async function updateClass(classId, updates) {
   });
 }
 
-export async function deleteClass(classId) {
+export async function deleteClass(classId: string): Promise<void> {
   const classRef = doc(db, COLLECTIONS.CLASSES, classId);
   await updateDoc(classRef, {
     isActive: false,
@@ -119,7 +223,7 @@ export async function deleteClass(classId) {
 
 // ============= STUDENT OPERATIONS =============
 
-export async function createStudent(studentData) {
+export async function createStudent(studentData: Omit<Student, 'id' | 'totalPoints' | 'currentLevel' | 'storiesRead' | 'missionsCompleted'>): Promise<string> {
   const studentRef = await addDoc(collection(db, COLLECTIONS.STUDENTS), {
     ...studentData,
     totalPoints: 0,
@@ -148,14 +252,17 @@ export async function createStudent(studentData) {
   return studentRef.id;
 }
 
-export async function getStudentById(studentId) {
+export async function getStudentById(studentId: string): Promise<Student | null> {
   const docRef = doc(db, COLLECTIONS.STUDENTS, studentId);
   const docSnap = await getDoc(docRef);
   if (!docSnap.exists()) return null;
-  return { id: docSnap.id, ...docSnap.data() };
+  return { id: docSnap.id, ...docSnap.data() } as Student;
 }
 
-export async function getStudentsByClass(classId) {
+export async function getStudentsByClass(classId: string): Promise<Student[]> {
+  if (isDemoMode) {
+    return demoStudents;
+  }
   const q = query(
     collection(db, COLLECTIONS.STUDENTS),
     where('classId', '==', classId),
@@ -163,10 +270,10 @@ export async function getStudentsByClass(classId) {
     orderBy('name', 'asc')
   );
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Student[];
 }
 
-export async function updateStudent(studentId, updates) {
+export async function updateStudent(studentId: string, updates: Partial<Student>): Promise<void> {
   const studentRef = doc(db, COLLECTIONS.STUDENTS, studentId);
   await updateDoc(studentRef, {
     ...updates,
@@ -176,7 +283,17 @@ export async function updateStudent(studentId, updates) {
 
 // ============= MISSION OPERATIONS =============
 
-export async function createMissionTemplate(missionData) {
+export interface MissionTemplateData {
+  title: string;
+  titleEn: string;
+  description: string;
+  descriptionEn: string;
+  type: string;
+  targetStories: number;
+  points: number;
+}
+
+export async function createMissionTemplate(missionData: MissionTemplateData): Promise<string> {
   const missionRef = await addDoc(collection(db, COLLECTIONS.MISSION_TEMPLATES), {
     ...missionData,
     isActive: true,
@@ -186,7 +303,7 @@ export async function createMissionTemplate(missionData) {
   return missionRef.id;
 }
 
-export async function assignMissionToStudent(studentId, missionTemplateId) {
+export async function assignMissionToStudent(studentId: string, missionTemplateId: string): Promise<string> {
   const missionRef = await addDoc(collection(db, COLLECTIONS.DAILY_MISSIONS), {
     studentId,
     missionTemplateId,
@@ -198,7 +315,10 @@ export async function assignMissionToStudent(studentId, missionTemplateId) {
   return missionRef.id;
 }
 
-export async function getMissionsForStudent(studentId) {
+export async function getMissionsForStudent(studentId: string): Promise<DemoMission[]> {
+  if (isDemoMode) {
+    return demoMissions;
+  }
   const q = query(
     collection(db, COLLECTIONS.DAILY_MISSIONS),
     where('studentId', '==', studentId),
@@ -206,10 +326,10 @@ export async function getMissionsForStudent(studentId) {
     orderBy('assignedAt', 'desc')
   );
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as DemoMission[];
 }
 
-export async function updateMissionProgress(missionId, progress, storyId) {
+export async function updateMissionProgress(missionId: string, progress: number, storyId: string): Promise<void> {
   const missionRef = doc(db, COLLECTIONS.DAILY_MISSIONS, missionId);
 
   await runTransaction(db, async (transaction) => {
@@ -217,7 +337,7 @@ export async function updateMissionProgress(missionId, progress, storyId) {
     if (!missionDoc.exists()) throw new Error('Mission does not exist');
 
     const mission = missionDoc.data();
-    const updates = {
+    const updates: any = {
       progress,
       updatedAt: serverTimestamp()
     };
@@ -245,7 +365,7 @@ export async function updateMissionProgress(missionId, progress, storyId) {
   });
 }
 
-export async function completeMission(missionId, studentId, pointsEarned) {
+export async function completeMission(missionId: string, studentId: string, pointsEarned: number): Promise<void> {
   const missionRef = doc(db, COLLECTIONS.DAILY_MISSIONS, missionId);
 
   await runTransaction(db, async (transaction) => {
@@ -268,11 +388,11 @@ export async function completeMission(missionId, studentId, pointsEarned) {
     const skillsDoc = await transaction.get(skillsRef);
     if (skillsDoc.exists()) {
       const skills = skillsDoc.data();
-      const newLevel = Math.floor(skills.readingLevel + 0.1);
+      const newLevel = Math.floor((skills.readingLevel as number) + 0.1);
       transaction.update(skillsRef, {
         readingLevel: newLevel,
         skillHistory: [
-          ...skills.skillHistory.slice(-19),
+          ...(skills.skillHistory as any[]).slice(-19),
           {
             level: newLevel,
             timestamp: serverTimestamp()
@@ -286,14 +406,43 @@ export async function completeMission(missionId, studentId, pointsEarned) {
 
 // ============= STUDENT SKILLS OPERATIONS =============
 
-export async function getStudentSkills(studentId) {
+interface StudentSkillsData {
+  id: string;
+  studentId: string;
+  readingLevel: number;
+  skills: {
+    fluency: number;
+    comprehension: number;
+    vocabulary: number;
+    grammar: number;
+  };
+  skillHistory: any[];
+  lastUpdated: any;
+}
+
+export async function getStudentSkills(studentId: string): Promise<StudentSkillsData | null> {
+  if (isDemoMode) {
+    return {
+      id: 'demo_skills',
+      studentId,
+      readingLevel: 2,
+      skills: {
+        fluency: 65,
+        comprehension: 70,
+        vocabulary: 60,
+        grammar: 55
+      },
+      skillHistory: [],
+      lastUpdated: new Date()
+    };
+  }
   const docRef = doc(db, COLLECTIONS.STUDENT_SKILLS, studentId);
   const docSnap = await getDoc(docRef);
   if (!docSnap.exists()) return null;
-  return { id: docSnap.id, ...docSnap.data() };
+  return { id: docSnap.id, ...docSnap.data() } as StudentSkillsData;
 }
 
-export async function updateStudentSkills(studentId, skillUpdates) {
+export async function updateStudentSkills(studentId: string, skillUpdates: Partial<StudentSkillsData['skills']>): Promise<void> {
   const skillsRef = doc(db, COLLECTIONS.STUDENT_SKILLS, studentId);
   await updateDoc(skillsRef, {
     skills: skillUpdates,
@@ -303,14 +452,36 @@ export async function updateStudentSkills(studentId, skillUpdates) {
 
 // ============= TEACHER STATS OPERATIONS =============
 
-export async function getTeacherStats(teacherId) {
-  const docRef = doc(db, COLLECTIONS.TEACHER_STATS, teacherId);
-  const docSnap = await getDoc(docRef);
-  if (!docSnap.exists()) return null;
-  return { id: docRef.id, ...docSnap.data() };
+export interface TeacherStats {
+  totalStudents: number;
+  totalClasses: number;
+  totalMissionsCompleted: number;
+  averageReadingLevel: number;
 }
 
-async function updateTeacherStats(teacherId, updates) {
+export async function getTeacherStats(teacherId: string): Promise<TeacherStats> {
+  if (isDemoMode) {
+    return {
+      totalStudents: 3,
+      totalClasses: 1,
+      totalMissionsCompleted: 10,
+      averageReadingLevel: 2.3
+    };
+  }
+  const docRef = doc(db, COLLECTIONS.TEACHER_STATS, teacherId);
+  const docSnap = await getDoc(docRef);
+  if (!docSnap.exists()) {
+    return {
+      totalStudents: 0,
+      totalClasses: 0,
+      totalMissionsCompleted: 0,
+      averageReadingLevel: 0
+    };
+  }
+  return { id: docRef.id, ...docSnap.data() } as TeacherStats;
+}
+
+async function updateTeacherStats(teacherId: string, updates: any): Promise<void> {
   const statsRef = doc(db, COLLECTIONS.TEACHER_STATS, teacherId);
   await updateDoc(statsRef, {
     ...updates,
@@ -318,7 +489,20 @@ async function updateTeacherStats(teacherId, updates) {
   });
 }
 
-export async function getClassAnalytics(classId) {
+export async function getClassAnalytics(classId: string): Promise<{
+  totalStudents: number;
+  avgReadingLevel: number;
+  totalPoints: number;
+  activeStudents: number;
+}> {
+  if (isDemoMode) {
+    return {
+      totalStudents: 3,
+      avgReadingLevel: 2.3,
+      totalPoints: 450,
+      activeStudents: 3
+    };
+  }
   // Get all students in class
   const students = await getStudentsByClass(classId);
 
@@ -338,7 +522,7 @@ export async function getClassAnalytics(classId) {
     avgReadingLevel: Math.round(avgReadingLevel * 10) / 10,
     totalPoints,
     activeStudents: students.filter(s => {
-      const lastActive = s.lastActiveAt?.toMillis() || 0;
+      const lastActive = (s as any).lastActiveAt?.toMillis() || 0;
       return Date.now() - lastActive < 7 * 24 * 60 * 60 * 1000;
     }).length
   };
@@ -346,7 +530,7 @@ export async function getClassAnalytics(classId) {
 
 // ============= CONTENT CACHE OPERATIONS =============
 
-export async function cacheStories(stories) {
+export async function cacheStories(stories: any[]): Promise<void> {
   const cacheRef = doc(db, COLLECTIONS.CONTENT_CACHE, 'stories');
   await setDoc(cacheRef, {
     content: stories,
@@ -355,7 +539,7 @@ export async function cacheStories(stories) {
   });
 }
 
-export async function getCachedStories() {
+export async function getCachedStories(): Promise<any | null> {
   const docRef = doc(db, COLLECTIONS.CONTENT_CACHE, 'stories');
   const docSnap = await getDoc(docRef);
   if (!docSnap.exists()) return null;
@@ -365,3 +549,4 @@ export async function getCachedStories() {
 // ============= EXPORT =============
 
 export const COLLECTION_NAMES = COLLECTIONS;
+export { isDemoMode };

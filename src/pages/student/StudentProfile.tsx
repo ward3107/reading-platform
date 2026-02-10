@@ -1,4 +1,21 @@
-function StudentProfile({ student, skills, onRefresh }) {
+import type { Student, StudentSkills } from '../../types';
+
+interface StudentProfileProps {
+  student: Student;
+  skills: any;
+  onRefresh: () => void;
+}
+
+interface Achievement {
+  icon: string;
+  title: string;
+  titleEn: string;
+  description: string;
+  descriptionEn: string;
+  unlocked: boolean;
+}
+
+function StudentProfile({ student, skills, onRefresh }: StudentProfileProps) {
   const currentLevel = student?.currentLevel || 1;
   const totalPoints = student?.totalPoints || 0;
   const storiesRead = student?.storiesRead || 0;
@@ -10,7 +27,7 @@ function StudentProfile({ student, skills, onRefresh }) {
   const levelProgress = (pointsInCurrentLevel / 100) * 100;
 
   // Generate achievements based on stats
-  const achievements = [
+  const achievements: Achievement[] = [
     {
       icon: '🌟',
       title: 'התחלה חדשה',
@@ -138,7 +155,7 @@ function StudentProfile({ student, skills, onRefresh }) {
 
           <div className="space-y-4">
             {Object.entries(skills.skills || {}).map(([skill, value]) => {
-              const skillLabels = {
+              const skillLabels: Record<string, { he: string; en: string; icon: string }> = {
                 fluency: { he: 'שטף קריאה', en: 'Fluency', icon: '💨' },
                 comprehension: { he: 'הבנת הנקרא', en: 'Comprehension', icon: '🧠' },
                 vocabulary: { he: 'אוצר מילים', en: 'Vocabulary', icon: '📚' },

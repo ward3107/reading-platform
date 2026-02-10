@@ -1,13 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { getStudentsByClass, createStudent } from '../../services/firestore';
+import type { Student, Class } from '../../types';
 
-function StudentsPage({ classes, onRefresh }) {
-  const [selectedClassId, setSelectedClassId] = useState(classes[0]?.id || '');
-  const [students, setStudents] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('name');
+interface StudentsPageProps {
+  classes: Class[];
+  onRefresh: () => void;
+}
+
+interface AddStudentFormData {
+  name: string;
+  studentId: string;
+  classId: string;
+}
+
+function StudentsPage({ classes, onRefresh }: StudentsPageProps) {
+  const [selectedClassId, setSelectedClassId] = useState<string>(classes[0]?.id || '');
+  const [students, setStudents] = useState<Student[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [showAddModal, setShowAddModal] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [sortBy, setSortBy] = useState<string>('name');
 
   useEffect(() => {
     if (selectedClassId) {
@@ -36,7 +48,7 @@ function StudentsPage({ classes, onRefresh }) {
       s.studentId?.toLowerCase().includes(searchTerm.toLowerCase())
     )
     .sort((a, b) => {
-      if (sortBy === 'name') return a.name?.localeCompare(b.name);
+      if (sortBy === 'name') return (a.name || '').localeCompare(b.name || '');
       if (sortBy === 'points') return (b.totalPoints || 0) - (a.totalPoints || 0);
       if (sortBy === 'level') return (b.currentLevel || 0) - (a.currentLevel || 0);
       if (sortBy === 'stories') return (b.storiesRead || 0) - (a.storiesRead || 0);
@@ -177,9 +189,12 @@ function StudentsPage({ classes, onRefresh }) {
 }
 
 // Student Row Component
-function StudentRow({ student }) {
-  const lastActive = student.lastActiveAt?.toDate() || new Date();
-  const daysSinceActive = Math.floor((Date.now() - lastActive.getTime()) / (1000 * 60 * 60 * 24));
+interface StudentRowProps {
+  student: Student;
+}
+
+function StudentRow({ student }: StudentRowProps) {
+  const daysSinceActive = Math.floor((Date.now() - ((student as any).lastActiveAt?.toDate?.()?.getTime() || Date.now())) / (1000 * 60 * 60 * 24));
   const isActive = daysSinceActive <= 7;
 
   return (
@@ -227,22 +242,28 @@ function StudentRow({ student }) {
 }
 
 // Add Student Modal Component
-function AddStudentModal({ classId, onClose, onAdded }) {
-  const [formData, setFormData] = useState({
+interface AddStudentModalProps {
+  classId: string;
+  onClose: () => void;
+  onAdded: () => void;
+}
+
+function AddStudentModal({ classId, onClose, onAdded }: AddStudentModalProps) {
+  const [formData, setFormData] = useState<AddStudentFormData>({
     name: '',
     studentId: '',
     classId: classId
   });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     try {
       await createStudent(formData);
       onAdded();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       alert('שגיאה ביצירת תלמיד: ' + error.message);
     } finally {
       setLoading(false);

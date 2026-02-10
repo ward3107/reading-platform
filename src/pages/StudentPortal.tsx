@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Outlet, Routes, Route, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getMissionsForStudent, getStudentSkills } from '../services/firestore';
-import { getStoriesForMission } from '../services/stories';
+import type { Student, StudentSkills } from '../types';
 
 // Student Pages
 import StudentHome from './student/StudentHome';
@@ -10,13 +10,30 @@ import StudentMissions from './student/StudentMissions';
 import StudentStories from './student/StudentStories';
 import StudentProfile from './student/StudentProfile';
 
-function StudentPortal() {
+interface DemoMission {
+  id: string;
+  title: string;
+  titleEn: string;
+  type: string;
+  targetStories: number;
+  points: number;
+  status: string;
+  progress: number;
+  assignedTo: number;
+  completedBy: number;
+}
+
+interface StudentPortalProps {
+  onRefresh?: () => void;
+}
+
+function StudentPortal({ onRefresh }: StudentPortalProps) {
   const { student, signOut } = useAuth();
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState('home');
-  const [missions, setMissions] = useState([]);
-  const [skills, setSkills] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState<string>('home');
+  const [missions, setMissions] = useState<DemoMission[]>([]);
+  const [skills, setSkills] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (student) {
@@ -28,10 +45,10 @@ function StudentPortal() {
     setLoading(true);
     try {
       const [missionsData, skillsData] = await Promise.all([
-        getMissionsForStudent(student.id),
-        getStudentSkills(student.id)
+        getMissionsForStudent(student!.id),
+        getStudentSkills(student!.id)
       ]);
-      setMissions(missionsData);
+      setMissions(missionsData as DemoMission[]);
       setSkills(skillsData);
     } catch (error) {
       console.error('Error loading student data:', error);
@@ -143,7 +160,7 @@ function StudentPortal() {
         <div className="max-w-6xl mx-auto py-6 lg:py-8">
           {currentPage === 'home' && (
             <StudentHome
-              student={student}
+              student={student!}
               missions={missions}
               skills={skills}
               onRefresh={loadStudentData}
@@ -155,7 +172,7 @@ function StudentPortal() {
 
           {currentPage === 'missions' && (
             <StudentMissions
-              student={student}
+              student={student!}
               missions={missions}
               onRefresh={loadStudentData}
             />
@@ -163,7 +180,7 @@ function StudentPortal() {
 
           {currentPage === 'stories' && (
             <StudentStories
-              student={student}
+              student={student!}
               skills={skills}
               onRefresh={loadStudentData}
             />
@@ -171,7 +188,7 @@ function StudentPortal() {
 
           {currentPage === 'profile' && (
             <StudentProfile
-              student={student}
+              student={student!}
               skills={skills}
               onRefresh={loadStudentData}
             />

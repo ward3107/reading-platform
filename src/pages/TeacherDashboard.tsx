@@ -6,6 +6,7 @@ import {
   getTeacherStats,
   getClassAnalytics
 } from '../services/firestore';
+import type { Teacher, Class } from '../types';
 
 // Dashboard Components
 import ClassesPage from './teacher/ClassesPage';
@@ -14,14 +15,30 @@ import MissionsPage from './teacher/MissionsPage';
 import ReportsPage from './teacher/ReportsPage';
 import SettingsPage from './teacher/SettingsPage';
 
+interface TeacherStats {
+  totalStudents: number;
+  totalClasses: number;
+  totalMissionsCompleted: number;
+  averageReadingLevel: number;
+}
+
+interface ClassWithAnalytics extends Class {
+  analytics?: {
+    totalStudents: number;
+    avgReadingLevel: number;
+    totalPoints: number;
+    activeStudents: number;
+  };
+}
+
 function TeacherDashboard() {
   const { teacher, signOut } = useAuth();
   const navigate = useNavigate();
-  const [classes, setClasses] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [currentPage, setCurrentPage] = useState('dashboard');
+  const [classes, setClasses] = useState<ClassWithAnalytics[]>([]);
+  const [stats, setStats] = useState<TeacherStats | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
+  const [currentPage, setCurrentPage] = useState<string>('dashboard');
 
   useEffect(() => {
     if (teacher) {
@@ -33,12 +50,12 @@ function TeacherDashboard() {
     setLoading(true);
     try {
       const [classesData, statsData] = await Promise.all([
-        getClassesByTeacher(teacher.id),
-        getTeacherStats(teacher.id)
+        getClassesByTeacher(teacher!.id),
+        getTeacherStats(teacher!.id)
       ]);
 
-      setClasses(classesData);
-      setStats(statsData);
+      setClasses(classesData as ClassWithAnalytics[]);
+      setStats(statsData as TeacherStats);
 
       // Load analytics for each class
       const classesWithAnalytics = await Promise.all(
@@ -198,7 +215,7 @@ function TeacherDashboard() {
           )}
 
           {currentPage === 'settings' && (
-            <SettingsPage teacher={teacher} onRefresh={loadDashboardData} />
+            <SettingsPage teacher={teacher!} onRefresh={loadDashboardData} />
           )}
         </div>
       </main>
@@ -207,7 +224,13 @@ function TeacherDashboard() {
 }
 
 // Dashboard Home Component
-function DashboardHome({ classes, stats, onRefresh }) {
+interface DashboardHomeProps {
+  classes: ClassWithAnalytics[];
+  stats: TeacherStats | null;
+  onRefresh: () => void;
+}
+
+function DashboardHome({ classes, stats, onRefresh }: DashboardHomeProps) {
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
@@ -256,7 +279,7 @@ function DashboardHome({ classes, stats, onRefresh }) {
             onClick={onRefresh}
             className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
           >
-            🨵רענן / Refresh
+            רענן / Refresh
           </button>
         </div>
 
@@ -313,8 +336,16 @@ function DashboardHome({ classes, stats, onRefresh }) {
 }
 
 // Stat Card Component
-function StatCard({ title, titleEn, value, icon, color }) {
-  const colorClasses = {
+interface StatCardProps {
+  title: string;
+  titleEn: string;
+  value: number | string;
+  icon: string;
+  color: 'blue' | 'green' | 'purple' | 'orange';
+}
+
+function StatCard({ title, titleEn, value, icon, color }: StatCardProps) {
+  const colorClasses: Record<string, string> = {
     blue: 'from-blue-500 to-blue-600',
     green: 'from-green-500 to-green-600',
     purple: 'from-purple-500 to-purple-600',
@@ -334,7 +365,11 @@ function StatCard({ title, titleEn, value, icon, color }) {
 }
 
 // Class Card Component
-function ClassCard({ classData }) {
+interface ClassCardProps {
+  classData: ClassWithAnalytics;
+}
+
+function ClassCard({ classData }: ClassCardProps) {
   return (
     <div className="border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-shadow bg-gradient-to-br from-white to-gray-50">
       <div className="flex items-start justify-between mb-4">
@@ -368,8 +403,15 @@ function ClassCard({ classData }) {
 }
 
 // Quick Action Button Component
-function QuickActionButton({ icon, label, labelEn, color }) {
-  const colorClasses = {
+interface QuickActionButtonProps {
+  icon: string;
+  label: string;
+  labelEn: string;
+  color: 'blue' | 'green' | 'purple' | 'orange';
+}
+
+function QuickActionButton({ icon, label, labelEn, color }: QuickActionButtonProps) {
+  const colorClasses: Record<string, string> = {
     blue: 'hover:bg-blue-50 hover:border-blue-300',
     green: 'hover:bg-green-50 hover:border-green-300',
     purple: 'hover:bg-purple-50 hover:border-purple-300',

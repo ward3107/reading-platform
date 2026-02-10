@@ -1,10 +1,23 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { createClass, updateClass, deleteClass } from '../../services/firestore';
+import type { Class } from '../../types';
 
-function ClassesPage({ classes, onRefresh }) {
-  const [showModal, setShowModal] = useState(false);
-  const [editingClass, setEditingClass] = useState(null);
-  const [formData, setFormData] = useState({
+interface ClassesPageProps {
+  classes: Class[];
+  onRefresh: () => void;
+}
+
+interface ClassFormData {
+  name: string;
+  nameEn: string;
+  grade: string;
+  description: string;
+}
+
+function ClassesPage({ classes, onRefresh }: ClassesPageProps) {
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [editingClass, setEditingClass] = useState<Class | null>(null);
+  const [formData, setFormData] = useState<ClassFormData>({
     name: '',
     nameEn: '',
     grade: '',
@@ -17,13 +30,13 @@ function ClassesPage({ classes, onRefresh }) {
     setShowModal(true);
   };
 
-  const openEditModal = (cls) => {
+  const openEditModal = (cls: Class) => {
     setEditingClass(cls);
     setFormData({
       name: cls.name,
       nameEn: cls.nameEn || '',
       grade: cls.grade || '',
-      description: cls.description || ''
+      description: (cls as any).description || ''
     });
     setShowModal(true);
   };
@@ -34,7 +47,7 @@ function ClassesPage({ classes, onRefresh }) {
     setFormData({ name: '', nameEn: '', grade: '', description: '' });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Implementation would call createClass or updateClass
     // For now, just close modal
@@ -42,7 +55,7 @@ function ClassesPage({ classes, onRefresh }) {
     onRefresh();
   };
 
-  const handleDeleteClass = async (classId) => {
+  const handleDeleteClass = async (classId: string) => {
     if (confirm('האם למחוק את הכיתה? / Delete this class?')) {
       await deleteClass(classId);
       onRefresh();
@@ -107,7 +120,13 @@ function ClassesPage({ classes, onRefresh }) {
 }
 
 // Class Card Component
-function ClassCard({ classData, onEdit, onDelete }) {
+interface ClassCardProps {
+  classData: Class;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+function ClassCard({ classData, onEdit, onDelete }: ClassCardProps) {
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
       <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4">
@@ -162,7 +181,15 @@ function ClassCard({ classData, onEdit, onDelete }) {
 }
 
 // Class Modal Component
-function ClassModal({ formData, setFormData, onSubmit, onClose, isEditing }) {
+interface ClassModalProps {
+  formData: ClassFormData;
+  setFormData: (data: ClassFormData) => void;
+  onSubmit: (e: FormEvent<HTMLFormElement>) => void;
+  onClose: () => void;
+  isEditing: boolean;
+}
+
+function ClassModal({ formData, setFormData, onSubmit, onClose, isEditing }: ClassModalProps) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
@@ -243,7 +270,7 @@ function ClassModal({ formData, setFormData, onSubmit, onClose, isEditing }) {
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              rows="3"
+              rows={3}
               placeholder="הוסף תיאור... / Add description..."
             />
           </div>

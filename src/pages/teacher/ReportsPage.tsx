@@ -1,9 +1,14 @@
 import { useState } from 'react';
+import type { Class } from '../../types';
 
-function ReportsPage({ classes }) {
-  const [selectedClassId, setSelectedClassId] = useState(classes[0]?.id || '');
-  const [reportType, setReportType] = useState('overview');
-  const [timeRange, setTimeRange] = useState('month');
+interface ReportsPageProps {
+  classes: Class[];
+}
+
+function ReportsPage({ classes }: ReportsPageProps) {
+  const [selectedClassId, setSelectedClassId] = useState<string>(classes[0]?.id || '');
+  const [reportType, setReportType] = useState<string>('overview');
+  const [timeRange, setTimeRange] = useState<string>('month');
 
   const selectedClass = classes.find(c => c.id === selectedClassId);
 
@@ -75,7 +80,7 @@ function ReportsPage({ classes }) {
           value="78%"
           icon="📖"
           trend="+5%"
-          positive
+          positive={true}
         />
         <StatCard
           title="השלמת משימות"
@@ -83,7 +88,7 @@ function ReportsPage({ classes }) {
           value="92%"
           icon="✅"
           trend="+12%"
-          positive
+          positive={true}
         />
         <StatCard
           title="רמת קריאה ממוצעת"
@@ -91,7 +96,7 @@ function ReportsPage({ classes }) {
           value="2.8"
           icon="📊"
           trend="+0.3"
-          positive
+          positive={true}
         />
         <StatCard
           title="משתתפים פעילים"
@@ -192,7 +197,16 @@ function ReportsPage({ classes }) {
 }
 
 // Stat Card Component
-function StatCard({ title, titleEn, value, icon, trend, positive }) {
+interface StatCardProps {
+  title: string;
+  titleEn: string;
+  value: string;
+  icon: string;
+  trend: string;
+  positive: boolean;
+}
+
+function StatCard({ title, titleEn, value, icon, trend, positive }: StatCardProps) {
   return (
     <div className="bg-white rounded-xl shadow p-5">
       <div className="flex items-center justify-between mb-3">

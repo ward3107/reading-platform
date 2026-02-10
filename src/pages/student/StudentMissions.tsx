@@ -1,10 +1,43 @@
 import { useState } from 'react';
+import type { Student, Story } from '../../types';
 import { getStoriesForMission } from '../../services/stories';
 
-function StudentMissions({ student, missions, onRefresh }) {
-  const [selectedMission, setSelectedMission] = useState(null);
-  const [currentStory, setCurrentStory] = useState(0);
-  const [showMissionDetail, setShowMissionDetail] = useState(false);
+interface DemoMission {
+  id: string;
+  title: string;
+  titleEn: string;
+  type: string;
+  targetStories: number;
+  points: number;
+  status: string;
+  progress: number;
+  assignedTo: number;
+  completedBy: number;
+}
+
+interface StudentMissionsProps {
+  student: Student;
+  missions: DemoMission[];
+  onRefresh: () => void;
+}
+
+interface MissionCardProps {
+  mission: DemoMission;
+  onStart: () => void;
+}
+
+interface MissionViewProps {
+  mission: DemoMission;
+  stories: Story[];
+  currentStory: number;
+  onCompleteStory: (storyId: string) => void;
+  onClose: () => void;
+}
+
+function StudentMissions({ student, missions, onRefresh }: StudentMissionsProps) {
+  const [selectedMission, setSelectedMission] = useState<DemoMission | null>(null);
+  const [currentStory, setCurrentStory] = useState<number>(0);
+  const [showMissionDetail, setShowMissionDetail] = useState<boolean>(false);
 
   // Mock stories for the mission
   const missionStories = selectedMission
@@ -14,12 +47,12 @@ function StudentMissions({ student, missions, onRefresh }) {
   const activeMissions = missions.filter(m => m.status === 'assigned' || m.status === 'in_progress');
   const completedMissions = missions.filter(m => m.status === 'completed');
 
-  const handleStartMission = (mission) => {
+  const handleStartMission = (mission: DemoMission) => {
     setSelectedMission(mission);
     setShowMissionDetail(true);
   };
 
-  const handleCompleteStory = async (storyId) => {
+  const handleCompleteStory = async (storyId: string) => {
     // Would update mission progress in Firestore
     if (currentStory < missionStories.length - 1) {
       setCurrentStory(currentStory + 1);
@@ -114,7 +147,7 @@ function StudentMissions({ student, missions, onRefresh }) {
 }
 
 // Mission Card Component
-function MissionCard({ mission, onStart }) {
+function MissionCard({ mission, onStart }: MissionCardProps) {
   const progress = mission.progress || 0;
   const totalStories = 3;
   const completedStories = Math.floor((progress / 100) * totalStories);
@@ -173,9 +206,9 @@ function MissionCard({ mission, onStart }) {
 }
 
 // Mission View Component (when reading stories for a mission)
-function MissionView({ mission, stories, currentStory, onCompleteStory, onClose }) {
-  const [showAnswer, setShowAnswer] = useState(false);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
+function MissionView({ mission, stories, currentStory, onCompleteStory, onClose }: MissionViewProps) {
+  const [showAnswer, setShowAnswer] = useState<boolean>(false);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
 
   const story = stories[currentStory];
   const progress = ((currentStory + 1) / stories.length) * 100;
@@ -189,7 +222,7 @@ function MissionView({ mission, stories, currentStory, onCompleteStory, onClose 
     );
   }
 
-  const handleAnswer = (answer) => {
+  const handleAnswer = (answer: string) => {
     setSelectedAnswer(answer);
     setShowAnswer(true);
   };

@@ -1,6 +1,6 @@
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { initializeApp, type FirebaseApp } from 'firebase/app';
+import { getFirestore, type Firestore } from 'firebase/firestore';
+import { getAuth, type Auth } from 'firebase/auth';
 
 // Firebase configuration - replace with your own config
 const firebaseConfig = {
@@ -13,11 +13,11 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app: FirebaseApp = initializeApp(firebaseConfig);
 
 // Initialize services
-export const db = getFirestore(app);
-export const auth = getAuth(app);
+export const db: Firestore = getFirestore(app);
+export const auth: Auth = getAuth(app);
 
 // Configure auth for Hebrew language support
 auth.languageCode = 'he';

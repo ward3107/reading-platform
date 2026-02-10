@@ -1,6 +1,48 @@
 import { useNavigate } from 'react-router-dom';
+import type { Student, StudentSkills } from '../../types';
 
-function StudentHome({ student, missions, skills, onRefresh, onStartMission }) {
+interface DemoMission {
+  id: string;
+  title: string;
+  titleEn: string;
+  type: string;
+  targetStories: number;
+  points: number;
+  status: string;
+  progress: number;
+  assignedTo: number;
+  completedBy: number;
+}
+
+interface StudentHomeProps {
+  student: Student;
+  missions: DemoMission[];
+  skills: any;
+  onRefresh: () => void;
+  onStartMission: (missionId: string) => void;
+}
+
+type ColorType = 'yellow' | 'purple' | 'blue' | 'green';
+
+interface StatCardProps {
+  title: string;
+  titleEn: string;
+  value: number;
+  icon: string;
+  color: ColorType;
+}
+
+interface QuickActionCardProps {
+  icon: string;
+  title: string;
+  titleEn: string;
+  description: string;
+  descriptionEn: string;
+  color: 'purple' | 'blue' | 'green';
+  onClick: () => void;
+}
+
+function StudentHome({ student, missions, skills, onRefresh, onStartMission }: StudentHomeProps) {
   const navigate = useNavigate();
 
   // Calculate stats
@@ -110,7 +152,7 @@ function StudentHome({ student, missions, skills, onRefresh, onStartMission }) {
             </div>
 
             <button
-              onClick={() => onStartMission()}
+              onClick={() => onStartMission('')}
               className="w-full py-4 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl font-bold text-lg hover:from-purple-600 hover:to-purple-700 transition-all shadow-lg"
             >
               📖 המשך לקרוא / Continue Reading
@@ -182,8 +224,8 @@ function StudentHome({ student, missions, skills, onRefresh, onStartMission }) {
 }
 
 // Stat Card Component
-function StatCard({ title, titleEn, value, icon, color }) {
-  const colorClasses = {
+function StatCard({ title, titleEn, value, icon, color }: StatCardProps) {
+  const colorClasses: Record<ColorType, string> = {
     yellow: 'from-yellow-400 to-orange-400',
     purple: 'from-purple-400 to-purple-600',
     blue: 'from-blue-400 to-blue-600',
@@ -201,8 +243,8 @@ function StatCard({ title, titleEn, value, icon, color }) {
 }
 
 // Quick Action Card Component
-function QuickActionCard({ icon, title, titleEn, description, descriptionEn, color, onClick }) {
-  const colorClasses = {
+function QuickActionCard({ icon, title, titleEn, description, descriptionEn, color, onClick }: QuickActionCardProps) {
+  const colorClasses: Record<string, string> = {
     purple: 'hover:border-purple-300 hover:bg-purple-50',
     blue: 'hover:border-blue-300 hover:bg-blue-50',
     green: 'hover:border-green-300 hover:bg-green-50'

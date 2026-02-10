@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import type { UserType } from './types';
 import './App.css';
 
 // Pages
@@ -8,7 +9,12 @@ import TeacherDashboard from './pages/TeacherDashboard';
 import StudentPortal from './pages/StudentPortal';
 
 // Protected Route Component
-function ProtectedRoute({ children, allowedUserType }) {
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+  allowedUserType: UserType;
+}
+
+function ProtectedRoute({ children, allowedUserType }: ProtectedRouteProps) {
   const { user, student, userType, loading } = useAuth();
 
   if (loading) {
@@ -31,11 +37,15 @@ function ProtectedRoute({ children, allowedUserType }) {
     return <Navigate to="/login" replace />;
   }
 
-  return children;
+  return <>{children}</>;
 }
 
 // Public Route - redirect if already logged in
-function PublicRoute({ children }) {
+interface PublicRouteProps {
+  children: React.ReactNode;
+}
+
+function PublicRoute({ children }: PublicRouteProps) {
   const { user, student, userType, loading } = useAuth();
 
   if (loading) {
@@ -54,7 +64,7 @@ function PublicRoute({ children }) {
     return <Navigate to="/student" replace />;
   }
 
-  return children;
+  return <>{children}</>;
 }
 
 function AppRoutes() {
