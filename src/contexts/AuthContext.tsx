@@ -13,17 +13,8 @@ import type { Teacher, Student, FirebaseUser, AuthContextValue, AuthResult, User
 
 const AuthContext = createContext<AuthContextValue>({} as AuthContextValue);
 
-// Check if Firebase is configured
-const checkFirebaseConfig = (): boolean => {
-  try {
-    const firebaseConfig = import.meta.env.VITE_FIREBASE_API_KEY;
-    return !firebaseConfig || firebaseConfig === 'your-api-key' || firebaseConfig === 'your-api-key-here';
-  } catch {
-    return true;
-  }
-};
-
-const shouldUseDemoMode = checkFirebaseConfig();
+// Check if Firebase is configured (demo mode if no valid auth)
+const shouldUseDemoMode = !auth;
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -188,7 +179,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Sign out
   const signOut = async (): Promise<AuthResult<void>> => {
     try {
-      if (!shouldUseDemoMode && auth.app) {
+      if (auth) {
         await firebaseSignOut(auth);
       }
       setUser(null);

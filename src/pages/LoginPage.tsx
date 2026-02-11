@@ -77,7 +77,7 @@ function LoginPage({ defaultMode = null }: LoginPageProps) {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-12">
             {/* Teacher Login Card */}
             <button
               onClick={() => setMode('teacher')}

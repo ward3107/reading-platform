@@ -24,16 +24,7 @@ import type {
 } from '../types';
 
 // ============= DEMO MODE CHECK =============
-let isDemoMode = false;
-
-// Check if Firebase is properly configured
-try {
-  if (!db || !db.app) {
-    isDemoMode = true;
-  }
-} catch (e) {
-  isDemoMode = true;
-}
+const isDemoMode = !db;
 
 // Demo data
 const demoClasses: Class[] = [

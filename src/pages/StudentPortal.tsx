@@ -157,7 +157,7 @@ function StudentPortal({ onRefresh }: StudentPortalProps) {
 
       {/* Main Content */}
       <main className="flex-1 lg:pt-0 pt-20 pb-24 lg:pb-0 px-4 lg:px-8">
-        <div className="max-w-6xl mx-auto py-6 lg:py-8">
+        <div className="w-full py-6 lg:py-8">
           {currentPage === 'home' && (
             <StudentHome
               student={student!}
