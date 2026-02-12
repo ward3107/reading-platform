@@ -71,19 +71,19 @@ function StudentPortal({ onRefresh }: StudentPortalProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-green-600"></div>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-cyan-50 to-teal-100">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-teal-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-green-50 to-emerald-100" dir="rtl">
+    <div className="flex min-h-screen bg-gradient-to-br from-cyan-50 to-teal-100" dir="rtl">
       {/* Mobile Header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 bg-white shadow-sm z-40 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-lg flex items-center justify-center text-white font-bold">
+            <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-teal-500 rounded-lg flex items-center justify-center text-white font-bold">
               {student?.name?.charAt(0) || 'ת'}
             </div>
             <div>
@@ -104,7 +104,7 @@ function StudentPortal({ onRefresh }: StudentPortalProps) {
         {/* Logo */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center text-white text-2xl font-bold">
+            <div className="w-14 h-14 bg-gradient-to-br from-cyan-400 to-teal-500 rounded-xl flex items-center justify-center text-white text-2xl font-bold">
               {student?.name?.charAt(0) || 'ת'}
             </div>
             <div>
@@ -130,8 +130,8 @@ function StudentPortal({ onRefresh }: StudentPortalProps) {
               onClick={() => setCurrentPage(item.id)}
               className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl transition-all ${
                 currentPage === item.id
-                  ? 'bg-gradient-to-l from-green-500 to-green-600 text-white shadow-lg'
-                  : 'text-gray-700 hover:bg-green-50 hover:text-green-700'
+                  ? 'bg-gradient-to-l from-teal-500 to-cyan-500 text-white shadow-lg'
+                  : 'text-gray-600 hover:bg-cyan-50 hover:text-teal-600'
               }`}
             >
               <span className="text-2xl">{item.icon}</span>
@@ -205,7 +205,7 @@ function StudentPortal({ onRefresh }: StudentPortalProps) {
               onClick={() => setCurrentPage(item.id)}
               className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors ${
                 currentPage === item.id
-                  ? 'text-green-600 bg-green-50'
+                  ? 'text-teal-600 bg-cyan-50'
                   : 'text-gray-500'
               }`}
             >

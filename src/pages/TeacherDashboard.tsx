@@ -95,16 +95,16 @@ function TeacherDashboard() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
       <aside
-        className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-gradient-to-b from-blue-800 to-blue-900 text-white transition-all duration-300 flex flex-col`}
+        className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-slate-800 text-white transition-all duration-300 flex flex-col`}
       >
         {/* Logo/Brand */}
-        <div className="p-4 border-b border-blue-700">
+        <div className="p-4 border-b border-slate-700">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
-              <span className="text-blue-800 font-bold text-xl">ק</span>
+            <div className="w-10 h-10 bg-teal-400 rounded-lg flex items-center justify-center flex-shrink-0">
+              <span className="text-white font-bold text-xl">ק</span>
             </div>
             {sidebarOpen && (
               <div>
@@ -123,8 +123,8 @@ function TeacherDashboard() {
               onClick={() => setCurrentPage(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                 currentPage === item.id
-                  ? 'bg-white text-blue-800 shadow-lg'
-                  : 'text-blue-100 hover:bg-blue-700 hover:text-white'
+                  ? 'bg-teal-500 text-white shadow-lg'
+                  : 'text-gray-300 hover:bg-slate-700 hover:text-white'
               }`}
             >
               <span className="text-2xl">{item.icon}</span>
@@ -139,21 +139,21 @@ function TeacherDashboard() {
         </nav>
 
         {/* User Info */}
-        <div className="p-4 border-t border-blue-700">
+        <div className="p-4 border-t border-slate-700">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
               <span className="font-bold">{teacher?.name?.charAt(0) || 'T'}</span>
             </div>
             {sidebarOpen && (
               <div className="flex-1 min-w-0">
                 <p className="font-semibold truncate">{teacher?.name || 'מורה'}</p>
-                <p className="text-xs text-blue-200 truncate">{teacher?.email}</p>
+                <p className="text-xs text-gray-400 truncate">{teacher?.email}</p>
               </div>
             )}
           </div>
           <button
             onClick={handleSignOut}
-            className="w-full mt-3 flex items-center gap-2 px-3 py-2 bg-blue-700 hover:bg-blue-600 rounded-lg text-sm transition-colors"
+            className="w-full mt-3 flex items-center gap-2 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition-colors"
           >
             <span>🚪</span>
             {sidebarOpen && <span>התנתק / Logout</span>}
@@ -234,9 +234,9 @@ function DashboardHome({ classes, stats, onRefresh }: DashboardHomeProps) {
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl p-8 text-white shadow-xl">
+      <div className="bg-gradient-to-r from-slate-700 to-slate-800 rounded-2xl p-8 text-white shadow-xl">
         <h1 className="text-3xl font-bold mb-2">שלום! נתראה שוב 👋</h1>
-        <p className="text-blue-100 text-lg">Welcome back! Here's your overview</p>
+        <p className="text-gray-300 text-lg">Welcome back! Here's your overview</p>
       </div>
 
       {/* Stats Grid */}
@@ -277,7 +277,7 @@ function DashboardHome({ classes, stats, onRefresh }: DashboardHomeProps) {
           <h3 className="text-xl font-bold text-gray-800">הכיתות שלי / My Classes</h3>
           <button
             onClick={onRefresh}
-            className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+            className="px-4 py-2 bg-teal-50 text-teal-700 rounded-lg hover:bg-teal-100 transition-colors"
           >
             רענן / Refresh
           </button>
@@ -288,7 +288,7 @@ function DashboardHome({ classes, stats, onRefresh }: DashboardHomeProps) {
             <div className="text-6xl mb-4">📚</div>
             <p className="text-gray-500 text-lg mb-4">אין עדיין כיתות</p>
             <p className="text-gray-400 mb-6">No classes yet. Create your first class!</p>
-            <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <button className="px-6 py-3 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors">
               + צור כיתה חדשה / Create New Class
             </button>
           </div>
@@ -346,10 +346,10 @@ interface StatCardProps {
 
 function StatCard({ title, titleEn, value, icon, color }: StatCardProps) {
   const colorClasses: Record<string, string> = {
-    blue: 'from-blue-500 to-blue-600',
-    green: 'from-green-500 to-green-600',
-    purple: 'from-purple-500 to-purple-600',
-    orange: 'from-orange-500 to-orange-600'
+    blue: 'from-cyan-500 to-cyan-600',
+    green: 'from-teal-500 to-teal-600',
+    purple: 'from-violet-500 to-violet-600',
+    orange: 'from-amber-500 to-amber-600'
   };
 
   return (
@@ -412,10 +412,10 @@ interface QuickActionButtonProps {
 
 function QuickActionButton({ icon, label, labelEn, color }: QuickActionButtonProps) {
   const colorClasses: Record<string, string> = {
-    blue: 'hover:bg-blue-50 hover:border-blue-300',
-    green: 'hover:bg-green-50 hover:border-green-300',
-    purple: 'hover:bg-purple-50 hover:border-purple-300',
-    orange: 'hover:bg-orange-50 hover:border-orange-300'
+    blue: 'hover:bg-cyan-50 hover:border-cyan-400',
+    green: 'hover:bg-teal-50 hover:border-teal-400',
+    purple: 'hover:bg-violet-50 hover:border-violet-400',
+    orange: 'hover:bg-amber-50 hover:border-amber-400'
   };
 
   return (

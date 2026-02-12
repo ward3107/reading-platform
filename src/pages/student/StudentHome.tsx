@@ -22,7 +22,7 @@ interface StudentHomeProps {
   onStartMission: (missionId: string) => void;
 }
 
-type ColorType = 'yellow' | 'purple' | 'blue' | 'green';
+type ColorType = 'amber' | 'violet' | 'sky' | 'teal';
 
 interface StatCardProps {
   title: string;
@@ -38,7 +38,7 @@ interface QuickActionCardProps {
   titleEn: string;
   description: string;
   descriptionEn: string;
-  color: 'purple' | 'blue' | 'green';
+  color: 'violet' | 'sky' | 'teal';
   onClick: () => void;
 }
 
@@ -56,7 +56,7 @@ function StudentHome({ student, missions, skills, onRefresh, onStartMission }: S
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
-      <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-3xl p-6 lg:p-8 text-white shadow-xl">
+      <div className="bg-gradient-to-r from-teal-500 to-cyan-500 rounded-3xl p-6 lg:p-8 text-white shadow-xl">
         <div className="flex items-center gap-4 mb-4">
           <div className="w-16 h-16 lg:w-20 lg:h-20 bg-white rounded-2xl flex items-center justify-center text-3xl lg:text-4xl">
             👋
@@ -65,12 +65,12 @@ function StudentHome({ student, missions, skills, onRefresh, onStartMission }: S
             <h1 className="text-2xl lg:text-3xl font-bold mb-1">
               שלום, {student?.name || 'תלמיד'}!
             </h1>
-            <p className="text-green-100 text-lg">מוכן להמשיך ללמוד?</p>
+            <p className="text-white/90 text-lg">מוכן להמשיך ללמוד?</p>
           </div>
         </div>
         <div className="bg-white/20 rounded-2xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-green-100">התקדמות לשלב {currentLevel + 1}</span>
+            <span className="text-white/90">התקדמות לשלב {currentLevel + 1}</span>
             <span className="font-bold">{progressPercent}%</span>
           </div>
           <div className="w-full bg-white/30 rounded-full h-3">
@@ -79,7 +79,7 @@ function StudentHome({ student, missions, skills, onRefresh, onStartMission }: S
               style={{ width: `${progressPercent}%` }}
             />
           </div>
-          <p className="text-sm text-green-100 mt-2">
+          <p className="text-sm text-white/90 mt-2">
             עוד {pointsToNextLevel} נקודות לשלב הבא
           </p>
         </div>
@@ -92,28 +92,28 @@ function StudentHome({ student, missions, skills, onRefresh, onStartMission }: S
           titleEn="Points"
           value={student?.totalPoints || 0}
           icon="⭐"
-          color="yellow"
+          color="amber"
         />
         <StatCard
           title="שלב"
           titleEn="Level"
           value={currentLevel}
           icon="🎖️"
-          color="purple"
+          color="violet"
         />
         <StatCard
           title="סיפורים"
           titleEn="Stories"
           value={storiesRead}
           icon="📖"
-          color="blue"
+          color="sky"
         />
         <StatCard
           title="משימות"
           titleEn="Missions"
           value={completedMissions}
           icon="✅"
-          color="green"
+          color="teal"
         />
       </div>
 
@@ -169,7 +169,7 @@ function StudentHome({ student, missions, skills, onRefresh, onStartMission }: S
           titleEn="Missions"
           description="המשימות שלך"
           descriptionEn="Your missions"
-          color="purple"
+          color="violet"
           onClick={() => navigate('/student/missions')}
         />
         <QuickActionCard
@@ -178,7 +178,7 @@ function StudentHome({ student, missions, skills, onRefresh, onStartMission }: S
           titleEn="Story Library"
           description="קרא סיפורים חדשים"
           descriptionEn="Read new stories"
-          color="blue"
+          color="sky"
           onClick={() => navigate('/student/stories')}
         />
       </div>
@@ -210,7 +210,7 @@ function StudentHome({ student, missions, skills, onRefresh, onStartMission }: S
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
-                    className="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full"
+                    className="bg-gradient-to-r from-cyan-400 to-teal-500 h-2 rounded-full"
                     style={{ width: `${value}%` }}
                   />
                 </div>
@@ -226,10 +226,10 @@ function StudentHome({ student, missions, skills, onRefresh, onStartMission }: S
 // Stat Card Component
 function StatCard({ title, titleEn, value, icon, color }: StatCardProps) {
   const colorClasses: Record<ColorType, string> = {
-    yellow: 'from-yellow-400 to-orange-400',
-    purple: 'from-purple-400 to-purple-600',
-    blue: 'from-blue-400 to-blue-600',
-    green: 'from-green-400 to-green-600'
+    amber: 'from-amber-400 to-amber-500',
+    violet: 'from-violet-500 to-violet-600',
+    sky: 'from-sky-400 to-sky-500',
+    teal: 'from-teal-400 to-teal-500'
   };
 
   return (
@@ -245,9 +245,9 @@ function StatCard({ title, titleEn, value, icon, color }: StatCardProps) {
 // Quick Action Card Component
 function QuickActionCard({ icon, title, titleEn, description, descriptionEn, color, onClick }: QuickActionCardProps) {
   const colorClasses: Record<string, string> = {
-    purple: 'hover:border-purple-300 hover:bg-purple-50',
-    blue: 'hover:border-blue-300 hover:bg-blue-50',
-    green: 'hover:border-green-300 hover:bg-green-50'
+    violet: 'hover:border-violet-400 hover:bg-violet-50',
+    sky: 'hover:border-sky-400 hover:bg-sky-50',
+    teal: 'hover:border-teal-400 hover:bg-teal-50'
   };
 
   return (
