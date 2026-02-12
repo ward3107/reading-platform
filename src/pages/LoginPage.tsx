@@ -69,9 +69,9 @@ function LoginPage({ defaultMode = null }: LoginPageProps) {
         <div className="max-w-4xl w-full">
           <div className="text-center mb-12">
             <h1 className="text-5xl font-bold text-gray-800 mb-4">
-              פלטפורמת קריאה
+              KriaKids
             </h1>
-            <h2 className="text-3xl text-gray-600">Reading Platform</h2>
+            <h2 className="text-3xl text-gray-600">קריאה לילדים</h2>
             <p className="text-gray-500 mt-4 text-lg">
               בחר את סוג הכניסה שלך
             </p>
@@ -125,10 +125,10 @@ function LoginPage({ defaultMode = null }: LoginPageProps) {
 
           <div className="text-center mt-12">
             <p className="text-gray-500 text-sm">
-              ברוכים הבאים לפלטפורמת הקריאה
+              ברוכים הבאים ל-KriaKids
             </p>
             <p className="text-gray-400 text-xs mt-1">
-              Welcome to the Reading Platform
+              Welcome to KriaKids
             </p>
           </div>
         </div>

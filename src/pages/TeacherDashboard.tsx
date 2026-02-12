@@ -104,12 +104,12 @@ function TeacherDashboard() {
         <div className="p-4 border-b border-slate-700">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-teal-400 rounded-lg flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold text-xl">ק</span>
+              <span className="text-white font-bold text-xl">K</span>
             </div>
             {sidebarOpen && (
               <div>
-                <h1 className="font-bold text-lg">פלטפורמת קריאה</h1>
-                <p className="text-xs text-blue-200">Reading Platform</p>
+                <h1 className="font-bold text-lg">KriaKids</h1>
+                <p className="text-xs text-gray-400">קריאה לילדים</p>
               </div>
             )}
           </div>
