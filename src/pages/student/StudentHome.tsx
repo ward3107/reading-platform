@@ -56,22 +56,22 @@ function StudentHome({ student, missions, skills, onRefresh, onStartMission }: S
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
-      <div className="bg-gradient-to-r from-teal-500 to-cyan-500 rounded-3xl p-6 lg:p-8 text-white shadow-xl">
+      <div className="bg-gradient-to-r from-teal-500 to-cyan-500 rounded-3xl p-6 lg:p-8 shadow-xl">
         <div className="flex items-center gap-4 mb-4">
           <div className="w-16 h-16 lg:w-20 lg:h-20 bg-white rounded-2xl flex items-center justify-center text-3xl lg:text-4xl">
             👋
           </div>
           <div>
-            <h1 className="text-2xl lg:text-3xl font-bold mb-1">
+            <h1 className="text-2xl lg:text-3xl font-bold mb-1 text-white">
               שלום, {student?.name || 'תלמיד'}!
             </h1>
-            <p className="text-white/90 text-lg">מוכן להמשיך ללמוד?</p>
+            <p className="text-white text-lg">מוכן להמשיך ללמוד?</p>
           </div>
         </div>
         <div className="bg-white/20 rounded-2xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-white/90">התקדמות לשלב {currentLevel + 1}</span>
-            <span className="font-bold">{progressPercent}%</span>
+            <span className="text-white">התקדמות לשלב {currentLevel + 1}</span>
+            <span className="font-bold text-white">{progressPercent}%</span>
           </div>
           <div className="w-full bg-white/30 rounded-full h-3">
             <div
@@ -79,7 +79,7 @@ function StudentHome({ student, missions, skills, onRefresh, onStartMission }: S
               style={{ width: `${progressPercent}%` }}
             />
           </div>
-          <p className="text-sm text-white/90 mt-2">
+          <p className="text-sm text-white mt-2">
             עוד {pointsToNextLevel} נקודות לשלב הבא
           </p>
         </div>
@@ -233,11 +233,11 @@ function StatCard({ title, titleEn, value, icon, color }: StatCardProps) {
   };
 
   return (
-    <div className={`bg-gradient-to-br ${colorClasses[color]} rounded-2xl p-4 lg:p-5 text-white shadow-lg`}>
+    <div className={`bg-gradient-to-br ${colorClasses[color]} rounded-2xl p-4 lg:p-5 shadow-lg`}>
       <div className="text-3xl lg:text-4xl mb-2">{icon}</div>
-      <div className="text-2xl lg:text-3xl font-bold mb-1">{value}</div>
-      <div className="text-sm text-white/80">{title}</div>
-      <div className="text-xs text-white/60">{titleEn}</div>
+      <div className="text-2xl lg:text-3xl font-bold mb-1 text-white">{value}</div>
+      <div className="text-sm text-white">{title}</div>
+      <div className="text-xs text-white/90">{titleEn}</div>
     </div>
   );
 }

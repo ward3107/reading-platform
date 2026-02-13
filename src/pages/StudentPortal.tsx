@@ -130,8 +130,8 @@ function StudentPortal({ onRefresh }: StudentPortalProps) {
               onClick={() => setCurrentPage(item.id)}
               className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl transition-all ${
                 currentPage === item.id
-                  ? 'bg-gradient-to-l from-teal-500 to-cyan-500 text-white shadow-lg'
-                  : 'text-gray-600 hover:bg-cyan-50 hover:text-teal-600'
+                  ? 'bg-teal-500 text-white shadow-lg'
+                  : 'bg-gray-100 text-gray-700 hover:bg-teal-100 hover:text-teal-700'
               }`}
             >
               <span className="text-2xl">{item.icon}</span>
