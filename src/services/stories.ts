@@ -15,7 +15,10 @@ const demoStories: Story[] = [
     emotionWords: ["worried", "happy"],
     themes: ["school", "support", "success"],
     comprehensionQuestion: "מי עוזר לתום להרגיש יותר טוב לפני המבחן?",
-    comprehensionQuestionEn: "Who helps Tom feel better before the test?"
+    comprehensionQuestionEn: "Who helps Tom feel better before the test?",
+    answerOptions: ["המורה", "החבר שלו", "האמא שלו", "הכלב"],
+    answerOptionsEn: ["The teacher", "His friend", "His mom", "The dog"],
+    correctAnswerIndex: 0
   },
   {
     id: "story_002",
@@ -30,7 +33,10 @@ const demoStories: Story[] = [
     emotionWords: ["sad", "happy"],
     themes: ["friendship", "loneliness", "connection"],
     comprehensionQuestion: "מה נועה עושה שעוזר למאיה?",
-    comprehensionQuestionEn: "What does Noa do that helps Maya?"
+    comprehensionQuestionEn: "What does Noa do that helps Maya?",
+    answerOptions: ["יושבת לידה ומדברת איתה", "נותנת לה אוכל", "משחקת איתה כדורגל", "קוראת למורה"],
+    answerOptionsEn: ["Sits next to her and talks", "Gives her food", "Plays soccer with her", "Calls the teacher"],
+    correctAnswerIndex: 0
   },
   {
     id: "story_003",
@@ -45,7 +51,10 @@ const demoStories: Story[] = [
     emotionWords: ["worried", "happy"],
     themes: ["play", "problem", "solution"],
     comprehensionQuestion: "מי מוצא את הכדור?",
-    comprehensionQuestionEn: "Who finds the ball?"
+    comprehensionQuestionEn: "Who finds the ball?",
+    answerOptions: ["הכלב", "דן", "השכן", "המורה"],
+    answerOptionsEn: ["The dog", "Dan", "The neighbor", "The teacher"],
+    correctAnswerIndex: 0
   },
   {
     id: "story_004",
@@ -60,7 +69,10 @@ const demoStories: Story[] = [
     emotionWords: ["happy"],
     themes: ["art", "family", "creativity"],
     comprehensionQuestion: "שרה ציירה תמונה של מי?",
-    comprehensionQuestionEn: "What did Sara draw a picture of?"
+    comprehensionQuestionEn: "What did Sara draw a picture of?",
+    answerOptions: ["חתול", "כלב", "פרח", "בית"],
+    answerOptionsEn: ["A cat", "A dog", "A flower", "A house"],
+    correctAnswerIndex: 0
   },
   {
     id: "story_005",
@@ -75,7 +87,10 @@ const demoStories: Story[] = [
     emotionWords: ["happy"],
     themes: ["food", "sharing", "family"],
     comprehensionQuestion: "בן מכין מה לארוחת הצהריים?",
-    comprehensionQuestionEn: "What does Ben make for lunch?"
+    comprehensionQuestionEn: "What does Ben make for lunch?",
+    answerOptions: ["כריך", "פיצה", "סלט", "פסטה"],
+    answerOptionsEn: ["A sandwich", "Pizza", "Salad", "Pasta"],
+    correctAnswerIndex: 0
   },
   {
     id: "story_006",
@@ -90,7 +105,10 @@ const demoStories: Story[] = [
     emotionWords: ["proud"],
     themes: ["sports", "effort", "achievement"],
     comprehensionQuestion: "למה עומר גאה בסוף הסיפור?",
-    comprehensionQuestionEn: "Why is Omer proud at the end of the story?"
+    comprehensionQuestionEn: "Why is Omer proud at the end of the story?",
+    answerOptions: ["הוא הבקיע שער", "הקבוצה שלו ניצחה", "הוא רץ מהר", "הוא קיבל ציון טוב"],
+    answerOptionsEn: ["He scored a goal", "His team won", "He ran fast", "He got a good grade"],
+    correctAnswerIndex: 0
   },
   {
     id: "story_007",
@@ -105,7 +123,10 @@ const demoStories: Story[] = [
     emotionWords: ["afraid", "safe"],
     themes: ["safety", "help", "community"],
     comprehensionQuestion: "מי עוזר לנועם?",
-    comprehensionQuestionEn: "Who helps Noam?"
+    comprehensionQuestionEn: "Who helps Noam?",
+    answerOptions: ["שוטרת", "חבר", "מורה", "אמא"],
+    answerOptionsEn: ["A policewoman", "A friend", "A teacher", "His mom"],
+    correctAnswerIndex: 0
   },
   {
     id: "story_008",
@@ -120,7 +141,10 @@ const demoStories: Story[] = [
     emotionWords: ["angry", "happy"],
     themes: ["friendship", "forgiveness", "conflict"],
     comprehensionQuestion: "רוי אומר לדן מה?",
-    comprehensionQuestionEn: "What does Roy say to Dan?"
+    comprehensionQuestionEn: "What does Roy say to Dan?",
+    answerOptions: ["סליחה", "תודה", "שלום", "להתראות"],
+    answerOptionsEn: ["Sorry", "Thank you", "Hello", "Goodbye"],
+    correctAnswerIndex: 0
   },
   {
     id: "story_009",
@@ -135,7 +159,10 @@ const demoStories: Story[] = [
     emotionWords: ["happy"],
     themes: ["music", "dance", "joy"],
     comprehensionQuestion: "מאיה מתחילה לעשות מה?",
-    comprehensionQuestionEn: "What does Maya start to do?"
+    comprehensionQuestionEn: "What does Maya start to do?",
+    answerOptions: ["לרקוד", "לשיר", "לצייר", "לכתוב"],
+    answerOptionsEn: ["To dance", "To sing", "To draw", "To write"],
+    correctAnswerIndex: 0
   },
   {
     id: "story_010",
@@ -150,7 +177,10 @@ const demoStories: Story[] = [
     emotionWords: ["happy"],
     themes: ["family", "grandparents", "love"],
     comprehensionQuestion: "מאיה מבקרת את סבתא כל כמה זמן?",
-    comprehensionQuestionEn: "How often does Maya visit her grandma?"
+    comprehensionQuestionEn: "How often does Maya visit her grandma?",
+    answerOptions: ["כל שבוע", "כל יום", "כל חודש", "פעם בשנה"],
+    answerOptionsEn: ["Every week", "Every day", "Every month", "Once a year"],
+    correctAnswerIndex: 0
   }
 ];
 
@@ -164,20 +194,61 @@ let storiesLoaded = false;
 async function loadStories(): Promise<Story[]> {
   if (storiesLoaded) return storiesData || [];
 
-  // Use demo stories directly for now
-  storiesData = demoStories;
+  try {
+    // Fetch stories from the public folder
+    const response = await fetch('/stories.json');
+    if (!response.ok) {
+      console.warn('Failed to load stories.json, using demo stories');
+      storiesData = demoStories;
+    } else {
+      const loaded: Story[] = await response.json();
+      // Merge in contextual answer options from demo when a story is missing them (by id)
+      const demoById = new Map(demoStories.map(s => [s.id, s]));
+      storiesData = loaded.map(story => {
+        const hasOptions = story.answerOptions && story.answerOptions.length > 0 && story.answerOptions[0] !== 'תשובה א׳';
+        if (hasOptions) return story;
+        const demo = demoById.get(story.id);
+        if (!demo?.answerOptions?.length) return story;
+        return {
+          ...story,
+          answerOptions: demo.answerOptions,
+          answerOptionsEn: demo.answerOptionsEn,
+          correctAnswerIndex: demo.correctAnswerIndex ?? 0
+        };
+      });
+    }
+  } catch (error) {
+    console.warn('Error loading stories.json, using demo stories:', error);
+    storiesData = demoStories;
+  }
+
   storiesLoaded = true;
-  return storiesData;
+  return storiesData || [];
+}
+
+/** True if the story has real multiple-choice options (not placeholder labels). Students should only see these. */
+export function hasRealAnswerOptions(story: Story): boolean {
+  const opts = story.answerOptions;
+  return !!(opts?.length && opts[0] !== 'תשובה א׳');
 }
 
 /**
- * Get all stories
+ * Get all stories (raw; includes some that may lack answer options).
  */
 export async function getAllStories(): Promise<Story[]> {
   if (!storiesLoaded) {
     await loadStories();
   }
   return storiesData || [];
+}
+
+/**
+ * Get stories that have real comprehension answer options so students can learn from multiple choice.
+ * Use this for the Story Library and for missions.
+ */
+export async function getStoriesWithQuestions(): Promise<Story[]> {
+  const all = await getAllStories();
+  return all.filter(hasRealAnswerOptions);
 }
 
 /**
@@ -232,10 +303,11 @@ export async function getRandomStories(count: number = 10, difficulty: number | 
 }
 
 /**
- * Get stories for a mission based on student skill level
+ * Get stories for a mission based on student skill level.
+ * Only returns stories that have real answer options so students can learn from choices.
  */
-export async function getStoriesForMission(studentLevel: number, missionType: string, count: number = 3): Promise<Story[]> {
-  const stories = await getAllStories();
+export async function getStoriesForMission(studentLevel: number, _missionType: string, count: number = 3): Promise<Story[]> {
+  const stories = await getStoriesWithQuestions();
 
   // Get stories at or slightly below student level
   const appropriateStories = stories.filter(story =>

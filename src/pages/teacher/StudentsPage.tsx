@@ -11,9 +11,10 @@ interface AddStudentFormData {
   name: string;
   studentId: string;
   classId: string;
+  isActive: boolean;
 }
 
-function StudentsPage({ classes, onRefresh }: StudentsPageProps) {
+function StudentsPage({ classes }: StudentsPageProps) {
   const [selectedClassId, setSelectedClassId] = useState<string>(classes[0]?.id || '');
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -252,7 +253,8 @@ function AddStudentModal({ classId, onClose, onAdded }: AddStudentModalProps) {
   const [formData, setFormData] = useState<AddStudentFormData>({
     name: '',
     studentId: '',
-    classId: classId
+    classId: classId,
+    isActive: true
   });
   const [loading, setLoading] = useState<boolean>(false);
 

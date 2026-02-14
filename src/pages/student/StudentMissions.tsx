@@ -1,6 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Student, Story } from '../../types';
 import { getStoriesForMission } from '../../services/stories';
+import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
+import { useAdaptiveDifficulty } from '../../hooks/useAdaptiveDifficulty';
+import {
+  LevelUpNotification,
+  LevelDownNotification,
+  PerformanceIndicator,
+  HintButton,
+  HintDisplay
+} from '../../components/AdaptiveDifficulty';
 
 interface DemoMission {
   id: string;
@@ -30,7 +39,8 @@ interface MissionViewProps {
   mission: DemoMission;
   stories: Story[];
   currentStory: number;
-  onCompleteStory: (storyId: string) => void;
+  student: Student;
+  onCompleteStory: () => void;
   onClose: () => void;
 }
 
@@ -38,11 +48,16 @@ function StudentMissions({ student, missions, onRefresh }: StudentMissionsProps)
   const [selectedMission, setSelectedMission] = useState<DemoMission | null>(null);
   const [currentStory, setCurrentStory] = useState<number>(0);
   const [showMissionDetail, setShowMissionDetail] = useState<boolean>(false);
+  const [missionStories, setMissionStories] = useState<Story[]>([]);
 
-  // Mock stories for the mission
-  const missionStories = selectedMission
-    ? getStoriesForMission(student?.currentLevel || 1, 'reading', 3)
-    : [];
+  // Fetch stories when mission is selected
+  useEffect(() => {
+    if (selectedMission) {
+      getStoriesForMission(student?.currentLevel || 1, 'reading', 3).then(setMissionStories);
+    } else {
+      setMissionStories([]);
+    }
+  }, [selectedMission, student?.currentLevel]);
 
   const activeMissions = missions.filter(m => m.status === 'assigned' || m.status === 'in_progress');
   const completedMissions = missions.filter(m => m.status === 'completed');
@@ -52,7 +67,7 @@ function StudentMissions({ student, missions, onRefresh }: StudentMissionsProps)
     setShowMissionDetail(true);
   };
 
-  const handleCompleteStory = async (storyId: string) => {
+  const handleCompleteStory = async () => {
     // Would update mission progress in Firestore
     if (currentStory < missionStories.length - 1) {
       setCurrentStory(currentStory + 1);
@@ -71,6 +86,7 @@ function StudentMissions({ student, missions, onRefresh }: StudentMissionsProps)
         mission={selectedMission}
         stories={missionStories}
         currentStory={currentStory}
+        student={student}
         onCompleteStory={handleCompleteStory}
         onClose={() => {
           setShowMissionDetail(false);
@@ -206,12 +222,32 @@ function MissionCard({ mission, onStart }: MissionCardProps) {
 }
 
 // Mission View Component (when reading stories for a mission)
-function MissionView({ mission, stories, currentStory, onCompleteStory, onClose }: MissionViewProps) {
+function MissionView({ stories, currentStory, student, onCompleteStory, onClose }: MissionViewProps) {
   const [showAnswer, setShowAnswer] = useState<boolean>(false);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [currentTask, setCurrentTask] = useState<number>(0);
+  const [hintsUsed, setHintsUsed] = useState<number>(0);
+  const [currentHint, setCurrentHint] = useState<string | null>(null);
+  const [answerStartTime, setAnswerStartTime] = useState<number>(Date.now());
+
+  const { speak, stop, isSpeaking } = useSpeechSynthesis({ lang: 'en-US', rate: 0.9 });
+  const {
+    state: adaptiveState,
+    recordAnswer,
+    showLevelUp,
+    showLevelDown,
+    dismissLevelUp,
+    dismissLevelDown,
+    getHintForQuestion,
+    currentDifficulty,
+    recommendedDifficulty
+  } = useAdaptiveDifficulty(student);
 
   const story = stories[currentStory];
   const progress = ((currentStory + 1) / stories.length) * 100;
+
+  // Generate multiple tasks for the story
+  const tasks = generateTasksForStory(story);
 
   if (!story) {
     return (
@@ -222,19 +258,66 @@ function MissionView({ mission, stories, currentStory, onCompleteStory, onClose 
     );
   }
 
-  const handleAnswer = (answer: string) => {
-    setSelectedAnswer(answer);
+  const handleAnswer = (index: number) => {
+    const responseTime = Date.now() - answerStartTime;
+    const isCorrect = index === (currentTaskData?.correctIndex ?? story.correctAnswerIndex ?? 0);
+
+    setSelectedAnswer(index);
     setShowAnswer(true);
+
+    // Record answer for adaptive difficulty
+    recordAnswer(story.id, isCorrect, responseTime, hintsUsed);
   };
 
-  const handleNext = () => {
-    onCompleteStory(story.id);
-    setShowAnswer(false);
-    setSelectedAnswer(null);
+  const handleShowHint = () => {
+    const taskType = currentTaskData?.type || 'comprehension';
+    const hint = getHintForQuestion(taskType as 'comprehension' | 'vocabulary' | 'translation');
+    setCurrentHint(hint);
+    setHintsUsed(prev => prev + 1);
   };
+
+  const handleNextTask = () => {
+    if (currentTask < tasks.length - 1) {
+      // Move to next task
+      setCurrentTask(currentTask + 1);
+      setShowAnswer(false);
+      setSelectedAnswer(null);
+      setCurrentHint(null);
+      setHintsUsed(0);
+      setAnswerStartTime(Date.now());
+    } else {
+      // All tasks complete, move to next story
+      onCompleteStory();
+      setShowAnswer(false);
+      setSelectedAnswer(null);
+      setCurrentTask(0);
+      setCurrentHint(null);
+      setHintsUsed(0);
+    }
+  };
+
+  const currentTaskData = tasks[currentTask];
+  const answerOptions = currentTaskData?.options || story.answerOptions || ['תשובה א׳', 'תשובה ב׳', 'תשובה ג׳', 'תשובה ד׳'];
+  const answerOptionsEn = currentTaskData?.optionsEn;
+  const correctIndex = currentTaskData?.correctIndex ?? story.correctAnswerIndex ?? 0;
 
   return (
     <div className="space-y-4">
+      {/* Level Up/Down Notifications */}
+      <LevelUpNotification
+        show={showLevelUp}
+        onDismiss={dismissLevelUp}
+        newLevel={currentDifficulty + 1}
+      />
+      <LevelDownNotification
+        show={showLevelDown}
+        onDismiss={dismissLevelDown}
+        newLevel={currentDifficulty - 1}
+      />
+
+      {/* Performance Indicator */}
+      <PerformanceIndicator state={adaptiveState} />
+
       {/* Progress Header */}
       <div className="bg-white rounded-xl shadow p-4">
         <div className="flex items-center justify-between mb-3">
@@ -252,11 +335,28 @@ function MissionView({ mission, stories, currentStory, onCompleteStory, onClose 
           </div>
           <div className="w-10" />
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
           <div
             className="bg-purple-500 h-2 rounded-full transition-all"
             style={{ width: `${progress}%` }}
           />
+        </div>
+        {/* Task Progress */}
+        <div className="flex items-center justify-center gap-2">
+          {tasks.map((_, idx) => (
+            <div
+              key={idx}
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                idx < currentTask
+                  ? 'bg-green-500 text-white'
+                  : idx === currentTask
+                  ? 'bg-purple-500 text-white'
+                  : 'bg-gray-200 text-gray-500'
+              }`}
+            >
+              {idx < currentTask ? '✓' : idx + 1}
+            </div>
+          ))}
         </div>
       </div>
 
@@ -268,6 +368,27 @@ function MissionView({ mission, stories, currentStory, onCompleteStory, onClose 
         </div>
 
         <div className="p-6">
+          {/* Read aloud button */}
+          <div className="flex justify-center mb-4">
+            <button
+              type="button"
+              onClick={() => (isSpeaking ? stop() : speak(story.text))}
+              className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-white transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 ${isSpeaking ? 'bg-red-600 hover:bg-red-700' : 'bg-purple-600 hover:bg-purple-700'}`}
+              aria-label={isSpeaking ? 'Stop reading' : 'Listen to story'}
+            >
+              {isSpeaking ? (
+                <>
+                  <span className="text-lg">⏹</span>
+                  <span>Stop / עצור</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-lg">🔊</span>
+                  <span>Listen to story / האזן לסיפור</span>
+                </>
+              )}
+            </button>
+          </div>
           <div className="text-lg leading-relaxed text-gray-800 text-center mb-6" dir="ltr">
             {story.text}
           </div>
@@ -279,33 +400,87 @@ function MissionView({ mission, stories, currentStory, onCompleteStory, onClose 
 
           {/* Comprehension Question */}
           <div className="border-t border-gray-200 pt-6">
-            <h3 className="font-bold text-gray-800 mb-3">שאלת הבנה:</h3>
-            <p className="text-gray-700 mb-4" dir="rtl">{story.comprehensionQuestion}</p>
-            <p className="text-gray-500 text-sm mb-4" dir="ltr">{story.comprehensionQuestionEn}</p>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-gray-800">שאלה {currentTask + 1}:</h3>
+                <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">
+                  {currentTaskData?.type === 'comprehension' ? 'הבנה' : currentTaskData?.type === 'vocabulary' ? 'אוצר מילים' : 'שאלה'}
+                </span>
+              </div>
+              {!showAnswer && !currentHint && (
+                <HintButton onShowHint={handleShowHint} hintsUsed={hintsUsed} maxHints={2} />
+              )}
+            </div>
+            <p className="text-gray-700 mb-2 text-lg" dir="rtl">{currentTaskData?.questionHe || story.comprehensionQuestion}</p>
+            <p className="text-gray-500 mb-4" dir="ltr">{currentTaskData?.questionEn || story.comprehensionQuestionEn}</p>
+
+            {/* Hint Display */}
+            {currentHint && (
+              <HintDisplay hint={currentHint} onClose={() => setCurrentHint(null)} />
+            )}
 
             {!showAnswer ? (
-              <div className="space-y-3">
-                {['Answer A', 'Answer B', 'Answer C', 'Answer D'].map((answer, idx) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {answerOptions.map((answer, idx) => (
                   <button
                     key={idx}
-                    onClick={() => handleAnswer(answer)}
-                    className="w-full p-4 border-2 border-gray-200 rounded-xl text-right hover:border-purple-300 hover:bg-purple-50 transition-colors"
+                    onClick={() => handleAnswer(idx)}
+                    className="w-full p-5 border-2 border-gray-200 rounded-xl text-right hover:border-purple-300 hover:bg-purple-50 transition-colors bg-white flex flex-col items-stretch gap-3"
                   >
-                    {answer}
+                    <span className="ml-2 font-bold text-gray-400">{['א׳', 'ב׳', 'ג׳', 'ד׳'][idx]}</span>
+                    <span className="text-gray-800" dir="rtl">{answer}</span>
+                    <span className="block text-lg text-gray-600 border-t border-gray-100 pt-2" dir="ltr">
+                      {answerOptionsEn?.[idx] ?? answer}
+                    </span>
                   </button>
                 ))}
               </div>
             ) : (
               <div className="space-y-4">
-                <div className={`p-4 rounded-xl ${selectedAnswer === 'Answer A' ? 'bg-green-100 border-2 border-green-300' : 'bg-gray-100'}`}>
-                  <p className="font-semibold text-green-700 mb-1">✅ תשובה נכונה!</p>
-                  <p className="text-gray-600">Correct Answer!</p>
+                {/* Show all answers with correct/incorrect highlighting */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {answerOptions.map((answer, idx) => (
+                    <div
+                      key={idx}
+                      className={`p-5 border-2 rounded-xl text-right flex flex-col gap-3 ${
+                        idx === correctIndex
+                          ? 'border-green-500 bg-green-50 text-green-800'
+                          : idx === selectedAnswer && idx !== correctIndex
+                          ? 'border-red-500 bg-red-50 text-red-800'
+                          : 'border-gray-200 bg-gray-50 text-gray-500'
+                      }`}
+                    >
+                      <span className="ml-2 font-bold">{['א׳', 'ב׳', 'ג׳', 'ד׳'][idx]}</span>
+                      <span dir="rtl">{answer}</span>
+                      <span className="block text-lg border-t border-gray-200 pt-2" dir="ltr">
+                        {answerOptionsEn?.[idx] ?? answer}
+                      </span>
+                      {idx === correctIndex && <span className="mr-2">✅</span>}
+                    </div>
+                  ))}
                 </div>
+
+                {selectedAnswer === correctIndex ? (
+                  <div className="bg-green-100 border-2 border-green-300 rounded-xl p-4">
+                    <p className="font-bold text-green-700">✅ מצוין! תשובה נכונה!</p>
+                    <p className="text-gray-600">Excellent! Correct answer!</p>
+                  </div>
+                ) : (
+                  <div className="bg-orange-100 border-2 border-orange-300 rounded-xl p-4">
+                    <p className="font-bold text-orange-700">👍 לא נורא! נסה שוב בפעם הבאה</p>
+                    <p className="text-gray-600">That's okay! Keep learning!</p>
+                  </div>
+                )}
+
                 <button
-                  onClick={handleNext}
+                  onClick={handleNextTask}
                   className="w-full py-4 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl font-bold text-lg hover:from-purple-600 hover:to-purple-700 transition-all"
                 >
-                  {currentStory < stories.length - 1 ? 'הסיפור הבא / Next Story →' : 'סיים משימה / Complete Mission 🎉'}
+                  {currentTask < tasks.length - 1
+                    ? `שאלה הבאה / Next Question →`
+                    : currentStory < stories.length - 1
+                    ? 'הסיפור הבא / Next Story →'
+                    : 'סיים משימה / Complete Mission 🎉'}
                 </button>
               </div>
             )}
@@ -317,3 +492,79 @@ function MissionView({ mission, stories, currentStory, onCompleteStory, onClose 
 }
 
 export default StudentMissions;
+
+// Generate multiple tasks for a story
+interface Task {
+  type: 'comprehension' | 'vocabulary' | 'translation';
+  questionHe: string;
+  questionEn: string;
+  options: string[];
+  optionsEn?: string[];
+  correctIndex: number;
+}
+
+function generateTasksForStory(story: Story | undefined): Task[] {
+  if (!story) return [];
+
+  const tasks: Task[] = [];
+
+  // Task 1: Main comprehension question (from story data) – Hebrew + English options
+  const mainOptions = story.answerOptions || ['תשובה א׳', 'תשובה ב׳', 'תשובה ג׳', 'תשובה ד׳'];
+  tasks.push({
+    type: 'comprehension',
+    questionHe: story.comprehensionQuestion || 'מה המשמעות של הסיפור?',
+    questionEn: story.comprehensionQuestionEn || 'What is the meaning of the story?',
+    options: mainOptions,
+    optionsEn: story.answerOptionsEn,
+    correctIndex: story.correctAnswerIndex ?? 0
+  });
+
+  // Task 2: Vocabulary question (if vocabulary exists)
+  if (story.vocabularyIds && story.vocabularyIds.length >= 4) {
+    const vocabWord = story.vocabularyIds[0];
+    const wrongWords = story.vocabularyIds.slice(1, 4);
+    tasks.push({
+      type: 'vocabulary',
+      questionHe: `מה המשמעות של המילה "${vocabWord}"?`,
+      questionEn: `What does "${vocabWord}" mean?`,
+      options: [vocabWord, ...wrongWords].sort(() => Math.random() - 0.5),
+      correctIndex: 0 // Will be adjusted after shuffle
+    });
+    // Fix correctIndex after shuffle
+    const lastTask = tasks[tasks.length - 1];
+    lastTask.correctIndex = lastTask.options.indexOf(vocabWord);
+  }
+
+  // Task 3: Another comprehension task
+  if (story.wordCount && story.wordCount > 30) {
+    const isLong = story.wordCount > 50;
+    tasks.push({
+      type: 'comprehension',
+      questionHe: isLong ? 'האם הסיפור ארוך או קצר?' : 'כמה מילים יש בסיפור?',
+      questionEn: isLong ? 'Is the story long or short?' : 'How many words are in the story?',
+      options: isLong
+        ? ['ארוך / Long', 'קצר / Short', 'בינוני / Medium', 'קשה לדעת / Hard to tell']
+        : [`בערך ${story.wordCount}`, `בערך ${story.wordCount + 20}`, `בערך ${Math.max(10, story.wordCount - 15)}`, `בערך ${story.wordCount + 50}`],
+      correctIndex: 0
+    });
+  }
+
+  // Task 4: Difficulty/Level question
+  tasks.push({
+    type: 'comprehension',
+    questionHe: 'מה רמת הקושי של הסיפור?',
+    questionEn: 'What is the difficulty level of this story?',
+    options: [
+      `Level ${story.difficulty}`,
+      `Level ${Math.max(1, story.difficulty - 1)}`,
+      `Level ${Math.min(5, story.difficulty + 1)}`,
+      `Level ${Math.min(5, story.difficulty + 2)}`
+    ].sort(() => Math.random() - 0.5),
+    correctIndex: 0
+  });
+  // Fix correctIndex after shuffle
+  const lastTask = tasks[tasks.length - 1];
+  lastTask.correctIndex = lastTask.options.indexOf(`Level ${story.difficulty}`);
+
+  return tasks;
+}

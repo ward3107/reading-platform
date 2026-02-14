@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from 'react';
 import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
@@ -20,12 +20,36 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+const isDev = import.meta.env.DEV;
+const skipLogin = isDev && import.meta.env.VITE_SKIP_LOGIN !== 'false';
+
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [teacher, setTeacher] = useState<Teacher | null>(null);
   const [student, setStudent] = useState<Student | null>(null);
   const [loading, setLoading] = useState<boolean>(shouldUseDemoMode ? false : true);
   const [userType, setUserType] = useState<UserType>(null); // 'teacher' | 'student' | null
+  const devAutoLoginDone = useRef(false);
+
+  // In development: skip login and auto-enter as a demo student so you don't type every time
+  useEffect(() => {
+    if (!skipLogin || devAutoLoginDone.current || loading) return;
+    devAutoLoginDone.current = true;
+    const mockStudent: Student = {
+      id: 'dev_student',
+      name: 'דניאל כהן',
+      studentId: 'dev_student',
+      classId: 'DEMO',
+      totalPoints: 0,
+      currentLevel: 1,
+      storiesRead: 0,
+      missionsCompleted: 0,
+      isActive: true
+    };
+    setStudent(mockStudent);
+    setUserType('student');
+    setUser({ uid: 'dev_student', email: 'dev@student.local' });
+  }, [loading]);
 
   useEffect(() => {
     if (shouldUseDemoMode) {
@@ -40,9 +64,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const initializeAuth = async () => {
       try {
         // Set persistence to local
-        await setPersistence(auth, browserLocalPersistence);
+        await setPersistence(auth!, browserLocalPersistence);
 
-        unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+        unsubscribe = onAuthStateChanged(auth!, async (firebaseUser) => {
           if (!isMounted) return;
 
           setLoading(true);
@@ -105,16 +129,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     try {
-      const result = await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth!, email, password);
       const teacherData = await getTeacherByEmail(email);
 
       if (!teacherData) {
-        await firebaseSignOut(auth);
+        await firebaseSignOut(auth!);
         return { success: false, error: 'Teacher account not found' };
       }
 
       if (!teacherData.isActive) {
-        await firebaseSignOut(auth);
+        await firebaseSignOut(auth!);
         return { success: false, error: 'Teacher account is inactive' };
       }
 
@@ -130,16 +154,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signInAsStudent = async (classCode: string, studentId: string): Promise<AuthResult<Student>> => {
     // Demo mode for testing without Firebase
     if (shouldUseDemoMode) {
-      // Mock login for demo
+      // Mock login for demo - fresh start for testing
       const mockStudent: Student = {
         id: 'demo_student',
         name: 'דניאל כהן',
         studentId: studentId,
         classId: classCode,
-        totalPoints: 150,
-        currentLevel: 2,
-        storiesRead: 12,
-        missionsCompleted: 3,
+        totalPoints: 0,
+        currentLevel: 1,
+        storiesRead: 0,
+        missionsCompleted: 0,
         isActive: true
       };
       setStudent(mockStudent);
@@ -149,7 +173,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     try {
-      const studentRef = doc(db, 'students', studentId);
+      const studentRef = doc(db!, 'students', studentId);
       const studentSnap = await getDoc(studentRef);
 
       if (!studentSnap.exists()) {

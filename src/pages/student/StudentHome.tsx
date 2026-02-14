@@ -1,5 +1,6 @@
-import { useNavigate } from 'react-router-dom';
-import type { Student, StudentSkills } from '../../types';
+import type { Student } from '../../types';
+import type { StreakData } from '../../utils/dailyStreaks';
+import { StreakDisplay, StreakMilestones } from '../../components/StreakDisplay';
 
 interface DemoMission {
   id: string;
@@ -18,36 +19,14 @@ interface StudentHomeProps {
   student: Student;
   missions: DemoMission[];
   skills: any;
+  streakData?: StreakData;
   onRefresh: () => void;
   onStartMission: (missionId: string) => void;
 }
 
-type ColorType = 'amber' | 'violet' | 'sky' | 'teal';
-
-interface StatCardProps {
-  title: string;
-  titleEn: string;
-  value: number;
-  icon: string;
-  color: ColorType;
-}
-
-interface QuickActionCardProps {
-  icon: string;
-  title: string;
-  titleEn: string;
-  description: string;
-  descriptionEn: string;
-  color: 'violet' | 'sky' | 'teal';
-  onClick: () => void;
-}
-
-function StudentHome({ student, missions, skills, onRefresh, onStartMission }: StudentHomeProps) {
-  const navigate = useNavigate();
-
+function StudentHome({ student, missions, skills, streakData, onStartMission }: StudentHomeProps) {
   // Calculate stats
   const activeMissions = missions.filter(m => m.status === 'assigned' || m.status === 'in_progress').length;
-  const completedMissions = missions.filter(m => m.status === 'completed').length;
   const storiesRead = student?.storiesRead || 0;
   const currentLevel = student?.currentLevel || 1;
   const pointsToNextLevel = (currentLevel * 100) - (student?.totalPoints || 0);
@@ -85,37 +64,10 @@ function StudentHome({ student, missions, skills, onRefresh, onStartMission }: S
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="נקודות"
-          titleEn="Points"
-          value={student?.totalPoints || 0}
-          icon="⭐"
-          color="amber"
-        />
-        <StatCard
-          title="שלב"
-          titleEn="Level"
-          value={currentLevel}
-          icon="🎖️"
-          color="violet"
-        />
-        <StatCard
-          title="סיפורים"
-          titleEn="Stories"
-          value={storiesRead}
-          icon="📖"
-          color="sky"
-        />
-        <StatCard
-          title="משימות"
-          titleEn="Missions"
-          value={completedMissions}
-          icon="✅"
-          color="teal"
-        />
-      </div>
+      {/* Streak Display */}
+      {streakData && streakData.currentStreak > 0 && (
+        <StreakDisplay streakData={streakData} />
+      )}
 
       {/* Active Mission */}
       {activeMissions > 0 && (
@@ -161,28 +113,6 @@ function StudentHome({ student, missions, skills, onRefresh, onStartMission }: S
         </div>
       )}
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-        <QuickActionCard
-          icon="🎯"
-          title="משימות"
-          titleEn="Missions"
-          description="המשימות שלך"
-          descriptionEn="Your missions"
-          color="violet"
-          onClick={() => navigate('/student/missions')}
-        />
-        <QuickActionCard
-          icon="📚"
-          title="ספריית סיפורים"
-          titleEn="Story Library"
-          description="קרא סיפורים חדשים"
-          descriptionEn="Read new stories"
-          color="sky"
-          onClick={() => navigate('/student/stories')}
-        />
-      </div>
-
       {/* Recent Achievement */}
       {storiesRead > 0 && (
         <div className="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-2xl p-5 border-2 border-yellow-200">
@@ -206,12 +136,12 @@ function StudentHome({ student, missions, skills, onRefresh, onStartMission }: S
               <div key={skill}>
                 <div className="flex justify-between text-sm mb-1">
                   <span className="text-gray-600 capitalize">{skill}</span>
-                  <span className="font-semibold">{value}/100</span>
+                  <span className="font-semibold">{value as number}/100</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-gradient-to-r from-cyan-400 to-teal-500 h-2 rounded-full"
-                    style={{ width: `${value}%` }}
+                    style={{ width: `${value as number}%` }}
                   />
                 </div>
               </div>
@@ -220,52 +150,6 @@ function StudentHome({ student, missions, skills, onRefresh, onStartMission }: S
         </div>
       )}
     </div>
-  );
-}
-
-// Stat Card Component
-function StatCard({ title, titleEn, value, icon, color }: StatCardProps) {
-  const colorClasses: Record<ColorType, string> = {
-    amber: 'from-amber-400 to-amber-500',
-    violet: 'from-violet-500 to-violet-600',
-    sky: 'from-sky-400 to-sky-500',
-    teal: 'from-teal-400 to-teal-500'
-  };
-
-  return (
-    <div className={`bg-gradient-to-br ${colorClasses[color]} rounded-2xl p-4 lg:p-5 shadow-lg`}>
-      <div className="text-3xl lg:text-4xl mb-2">{icon}</div>
-      <div className="text-2xl lg:text-3xl font-bold mb-1 text-white">{value}</div>
-      <div className="text-sm text-white">{title}</div>
-      <div className="text-xs text-white/90">{titleEn}</div>
-    </div>
-  );
-}
-
-// Quick Action Card Component
-function QuickActionCard({ icon, title, titleEn, description, descriptionEn, color, onClick }: QuickActionCardProps) {
-  const colorClasses: Record<string, string> = {
-    violet: 'hover:border-violet-400 hover:bg-violet-50',
-    sky: 'hover:border-sky-400 hover:bg-sky-50',
-    teal: 'hover:border-teal-400 hover:bg-teal-50'
-  };
-
-  return (
-    <button
-      onClick={onClick}
-      className={`bg-white rounded-2xl shadow p-5 text-right border-2 border-transparent transition-all ${colorClasses[color]}`}
-    >
-      <div className="flex items-start gap-4">
-        <div className="text-4xl">{icon}</div>
-        <div className="flex-1">
-          <h3 className="font-bold text-lg text-gray-800 mb-1">{title}</h3>
-          <p className="text-xs text-gray-400 mb-2">{titleEn}</p>
-          <p className="text-gray-600 text-sm">{description}</p>
-          <p className="text-gray-400 text-xs">{descriptionEn}</p>
-        </div>
-        <span className="text-gray-400 text-xl">←</span>
-      </div>
-    </button>
   );
 }
 

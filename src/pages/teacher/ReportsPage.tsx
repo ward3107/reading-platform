@@ -10,8 +10,6 @@ function ReportsPage({ classes }: ReportsPageProps) {
   const [reportType, setReportType] = useState<string>('overview');
   const [timeRange, setTimeRange] = useState<string>('month');
 
-  const selectedClass = classes.find(c => c.id === selectedClassId);
-
   return (
     <div className="space-y-6">
       {/* Header */}

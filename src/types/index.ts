@@ -13,6 +13,9 @@ export interface Story {
   themes: string[];
   comprehensionQuestion: string;
   comprehensionQuestionEn: string;
+  answerOptions?: string[];           // Hebrew answer options
+  answerOptionsEn?: string[];         // English answer options
+  correctAnswerIndex?: number;        // Index of correct answer (0-3)
 }
 
 // Student Types
@@ -189,4 +192,37 @@ export interface StudentStats {
   storiesRead: number;
   currentLevel: number;
   missionsCompleted: number;
+}
+
+// Vocabulary & Spaced Repetition Types
+export interface VocabularyWord {
+  id: string;
+  word: string;
+  meaning: string;
+  meaningHe: string;
+  example?: string;
+  difficulty: number;
+  category?: string;
+  imageUrl?: string;
+}
+
+export interface VocabularyProgress {
+  wordId: string;
+  studentId: string;
+  timesReviewed: number;
+  timesCorrect: number;
+  timesIncorrect: number;
+  lastReviewedAt: string | null;
+  nextReviewAt: string;
+  easeFactor: number;          // SM-2 algorithm ease factor (default 2.5)
+  interval: number;            // Days until next review
+  status: 'new' | 'learning' | 'review' | 'mastered';
+}
+
+export interface VocabularyReviewSession {
+  words: VocabularyProgress[];
+  currentIndex: number;
+  startTime: string;
+  correctCount: number;
+  incorrectCount: number;
 }

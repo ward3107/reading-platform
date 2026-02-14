@@ -1,21 +1,19 @@
 import { useState, useEffect } from 'react';
-import { getAllStories } from '../../services/stories';
-import type { Story, Student, StudentSkills, StoryCardProps, StoryReaderProps } from '../../types';
+import { getStoriesWithQuestions } from '../../services/stories';
+import type { Story, Student, StoryCardProps, StoryReaderProps } from '../../types';
+import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
 
 interface StudentStoriesProps {
   student: Student;
-  skills?: StudentSkills;
   onRefresh: () => void;
 }
 
-function StudentStories({ student, skills, onRefresh }: StudentStoriesProps) {
+function StudentStories({ student, onRefresh }: StudentStoriesProps) {
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
-  const [filter, setFilter] = useState<'all' | 'difficulty' | 'theme'>('all');
-  const [selectedDifficulty, setSelectedDifficulty] = useState<number>(1);
-  const [selectedTheme, setSelectedTheme] = useState<string>('all');
+  const [filter, setFilter] = useState<'all' | 'level'>('all');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<number>(student?.currentLevel || 1);
   const [showAnswer, setShowAnswer] = useState<boolean>(false);
   const [stories, setStories] = useState<Story[]>([]);
-  const [themes, setThemes] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   // Load stories on mount
@@ -23,13 +21,11 @@ function StudentStories({ student, skills, onRefresh }: StudentStoriesProps) {
     const loadData = async () => {
       setLoading(true);
       try {
-        const loadedStories = await getAllStories();
+        const loadedStories = await getStoriesWithQuestions();
         setStories(loadedStories);
-        setThemes(loadedStories.flatMap(s => s.themes || []).filter((v, i, a) => a.indexOf(v) === i).sort());
       } catch (error) {
         console.error('Error loading stories:', error);
         setStories([]);
-        setThemes([]);
       } finally {
         setLoading(false);
       }
@@ -37,8 +33,26 @@ function StudentStories({ student, skills, onRefresh }: StudentStoriesProps) {
     loadData();
   }, []);
 
-  // Apply filters
-  const filteredStories = stories.slice(0, 50);
+  // Set default difficulty based on student level
+  useEffect(() => {
+    if (student?.currentLevel) {
+      setSelectedDifficulty(student.currentLevel);
+    }
+  }, [student?.currentLevel]);
+
+  // Apply filters - show stories appropriate for student level
+  const filteredStories = stories.filter(story => {
+    if (filter === 'all') {
+      // Show stories at or near student's level (+/- 1 level)
+      const studentLevel = student?.currentLevel || 1;
+      return story.difficulty >= studentLevel - 1 && story.difficulty <= studentLevel + 1;
+    }
+    if (filter === 'level') {
+      return story.difficulty === selectedDifficulty;
+    }
+    return true;
+  });
+
   const storiesRead = student?.storiesRead || 0;
 
   const handleStoryComplete = () => {
@@ -75,9 +89,14 @@ function StudentStories({ student, skills, onRefresh }: StudentStoriesProps) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">ספריית הסיפורים</h1>
-        <p className="text-gray-600">Story Library</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">ספריית הסיפורים</h1>
+          <p className="text-gray-600">Story Library</p>
+        </div>
+        <div className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full font-bold">
+          📚 {filteredStories.length} סיפורים
+        </div>
       </div>
 
       {/* Stats Bar */}
@@ -100,16 +119,15 @@ function StudentStories({ student, skills, onRefresh }: StudentStoriesProps) {
             </label>
             <select
               value={filter}
-              onChange={(e) => setFilter(e.target.value as 'all' | 'difficulty' | 'theme')}
+              onChange={(e) => setFilter(e.target.value as 'all' | 'level')}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="all">הכל / All Stories</option>
-              <option value="difficulty">רמת קושי / Difficulty</option>
-              <option value="theme">נושא / Theme</option>
+              <option value="all">רמה שלי / My Level ({student?.currentLevel || 1})</option>
+              <option value="level">רמה ספציפית / Specific Level</option>
             </select>
           </div>
 
-          {filter === 'difficulty' && (
+          {filter === 'level' && (
             <div className="flex-1">
               <label className="block text-gray-700 mb-2 text-sm font-medium">
                 רמה / Level
@@ -121,26 +139,8 @@ function StudentStories({ student, skills, onRefresh }: StudentStoriesProps) {
               >
                 {[1, 2, 3, 4, 5].map(level => (
                   <option key={level} value={level}>
-                    שָׁׁמֶשׁ {level}
+                    Level {level}
                   </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {filter === 'theme' && (
-            <div className="flex-1">
-              <label className="block text-gray-700 mb-2 text-sm font-medium">
-                נושא / Theme
-              </label>
-              <select
-                value={selectedTheme}
-                onChange={(e) => setSelectedTheme(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">כל הנושאים / All Themes</option>
-                {themes.map(theme => (
-                  <option key={theme} value={theme}>{theme}</option>
                 ))}
               </select>
             </div>
@@ -182,8 +182,8 @@ function StoryCard({ story, onClick }: StoryCardProps) {
           <h3 className="font-bold text-lg text-gray-800 mb-1">{story.titleEn}</h3>
           <p className="text-sm text-gray-500">{story.title}</p>
         </div>
-        <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-bold">
-          שָׁׁמֶשׁ {story.difficulty}
+        <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-bold">
+          ☀️ {story.difficulty}
         </span>
       </div>
 
@@ -210,6 +210,23 @@ function StoryCard({ story, onClick }: StoryCardProps) {
 
 // Story Reader Component
 function StoryReader({ story, onComplete, onClose, showAnswer, onAnswer }: StoryReaderProps) {
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [isCorrectAnswer, setIsCorrectAnswer] = useState<boolean | null>(null);
+  const { speak, stop, isSpeaking } = useSpeechSynthesis({ lang: 'en-US', rate: 0.9 });
+
+  const handleSelectAnswer = (index: number) => {
+    setSelectedAnswer(index);
+    const isCorrect = index === (story.correctAnswerIndex ?? 0);
+    setIsCorrectAnswer(isCorrect);
+    onAnswer();
+  };
+
+  const answerOptions = story.answerOptions || ['תשובה א׳', 'תשובה ב׳', 'תשובה ג׳', 'תשובה ד׳'];
+  const answerOptionsEn = story.answerOptionsEn;
+  const correctIndex = story.correctAnswerIndex ?? 0;
+  // Story Library only shows stories with real options; this is a fallback if opened by id
+  const hasRealOptions = answerOptions.length > 0 && answerOptions[0] !== 'תשובה א׳';
+
   return (
     <div className="space-y-4">
       {/* Back Button */}
@@ -225,13 +242,34 @@ function StoryReader({ story, onComplete, onClose, showAnswer, onAnswer }: Story
       <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
         <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 text-white text-center">
           <span className="px-4 py-2 bg-white/20 rounded-full text-sm font-bold mb-3 inline-block">
-            שָׁׁמֶשׁ {story.difficulty}
+            ☀️ Level {story.difficulty}
           </span>
           <h2 className="text-3xl font-bold mb-2">{story.titleEn}</h2>
           <p className="text-blue-100 text-lg">{story.title}</p>
         </div>
 
         <div className="p-6 lg:p-8">
+          {/* Read aloud button */}
+          <div className="flex justify-center mb-4">
+            <button
+              type="button"
+              onClick={() => (isSpeaking ? stop() : speak(story.text))}
+              className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-white transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 ${isSpeaking ? 'bg-red-600 focus:ring-red-400 hover:bg-red-700' : 'bg-blue-500 focus:ring-blue-400 hover:bg-blue-600'}`}
+              aria-label={isSpeaking ? 'Stop reading' : 'Listen to story'}
+            >
+              {isSpeaking ? (
+                <>
+                  <span className="text-lg">⏹</span>
+                  <span>Stop / עצור</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-lg">🔊</span>
+                  <span>Listen to story / האזן לסיפור</span>
+                </>
+              )}
+            </button>
+          </div>
           {/* English Text */}
           <div className="text-xl leading-relaxed text-gray-800 text-center mb-8" dir="ltr">
             {story.text}
@@ -279,23 +317,74 @@ function StoryReader({ story, onComplete, onClose, showAnswer, onAnswer }: Story
             <p className="text-gray-500 mb-6" dir="ltr">{story.comprehensionQuestionEn}</p>
 
             {!showAnswer ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                {['תשובה א׳', 'תשובה ב׳', 'תשובה ג׳', 'תשובה ד׳'].map((answer, idx) => (
+              hasRealOptions ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+                  {answerOptions.map((answer, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleSelectAnswer(idx)}
+                      className="p-5 border-2 border-gray-200 rounded-xl text-right hover:border-blue-300 hover:bg-blue-50 transition-colors text-lg text-gray-800 bg-white flex flex-col items-stretch gap-3"
+                    >
+                      <span className="ml-2 font-bold text-gray-400">{['א׳', 'ב׳', 'ג׳', 'ד׳'][idx]}</span>
+                      <span dir="rtl" className="text-gray-800">{answer}</span>
+                      <span className="block text-lg text-gray-600 border-t border-gray-100 pt-2" dir="ltr">
+                        {answerOptionsEn?.[idx] ?? answer}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                  <p className="text-amber-800 mb-3">שאלות הבנה לא זמינות לסיפור זה. חזור לספרייה ובחר סיפור אחר.</p>
+                  <p className="text-gray-600 text-sm mb-3">Comprehension questions are not available for this story. Go back and choose another story.</p>
                   <button
-                    key={idx}
-                    onClick={onAnswer}
-                    className="p-4 border-2 border-gray-200 rounded-xl text-right hover:border-blue-300 hover:bg-blue-50 transition-colors text-lg"
+                    onClick={onClose}
+                    className="px-6 py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600"
                   >
-                    {answer}
+                    חזור לספרייה / Back to library
                   </button>
-                ))}
-              </div>
+                </div>
+              )
             ) : (
               <div className="space-y-6">
-                <div className="bg-green-100 border-2 border-green-300 rounded-xl p-5">
-                  <p className="font-bold text-green-700 text-lg mb-2">✅ מצוין! קראת סיפור נוסף</p>
-                  <p className="text-gray-700">You read another story and made progress!</p>
+                {hasRealOptions ? (
+                <>
+                {/* Show all answers with correct/incorrect highlighting */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+                  {answerOptions.map((answer, idx) => (
+                    <div
+                      key={idx}
+                      className={`p-5 border-2 rounded-xl text-right text-lg flex flex-col gap-3 ${
+                        idx === correctIndex
+                          ? 'border-green-500 bg-green-50 text-green-800'
+                          : idx === selectedAnswer && idx !== correctIndex
+                          ? 'border-red-500 bg-red-50 text-red-800'
+                          : 'border-gray-200 bg-gray-50 text-gray-500'
+                      }`}
+                    >
+                      <span className="ml-2 font-bold">{['א׳', 'ב׳', 'ג׳', 'ד׳'][idx]}</span>
+                      <span dir="rtl">{answer}</span>
+                      <span className="block text-lg border-t border-gray-200 pt-2" dir="ltr">
+                        {answerOptionsEn?.[idx] ?? answer}
+                      </span>
+                      {idx === correctIndex && <span className="mr-2">✅</span>}
+                    </div>
+                  ))}
                 </div>
+
+                {isCorrectAnswer ? (
+                  <div className="bg-green-100 border-2 border-green-300 rounded-xl p-5">
+                    <p className="font-bold text-green-700 text-lg mb-2">✅ מצוין! תשובה נכונה!</p>
+                    <p className="text-gray-700">Excellent! Correct answer!</p>
+                  </div>
+                ) : (
+                  <div className="bg-orange-100 border-2 border-orange-300 rounded-xl p-5">
+                    <p className="font-bold text-orange-700 text-lg mb-2">👍 לא נורא! נסה שוב בפעם הבאה</p>
+                    <p className="text-gray-700">That's okay! Try again next time. You still made progress!</p>
+                  </div>
+                )}
+                </>
+                ) : null}
 
                 <div className="flex gap-4">
                   <button

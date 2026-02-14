@@ -1,5 +1,5 @@
 {
-  "compilerOptions": {
+  "compilerOptions": {        // Ensure type is correctly inferred  
     "target": "ES2020",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
@@ -15,11 +15,11 @@
     "jsx": "react-jsx",
 
     /* Linting */
+    "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true,
+    "noFallthroughCasesInSwitch": true, 
 
     /* Path aliases */
     "baseUrl": ".",

@@ -1,9 +1,9 @@
-import type { Student, StudentSkills } from '../../types';
+import type { Student } from '../../types';
 
 interface StudentProfileProps {
   student: Student;
   skills: any;
-  onRefresh: () => void;
+  onRefresh?: () => void;
 }
 
 interface Achievement {
@@ -15,14 +15,13 @@ interface Achievement {
   unlocked: boolean;
 }
 
-function StudentProfile({ student, skills, onRefresh }: StudentProfileProps) {
+function StudentProfile({ student, skills }: StudentProfileProps) {
   const currentLevel = student?.currentLevel || 1;
   const totalPoints = student?.totalPoints || 0;
   const storiesRead = student?.storiesRead || 0;
   const missionsCompleted = student?.missionsCompleted || 0;
 
   // Calculate level progress
-  const pointsForNextLevel = currentLevel * 100;
   const pointsInCurrentLevel = totalPoints % 100;
   const levelProgress = (pointsInCurrentLevel / 100) * 100;
 
@@ -105,7 +104,7 @@ function StudentProfile({ student, skills, onRefresh }: StudentProfileProps) {
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className="text-sm text-gray-500">שלב נוכחי / Current Level</p>
-                <p className="text-3xl font-bold text-gray-800">שָׁׁמֶשׁ {currentLevel}</p>
+                <p className="text-3xl font-bold text-gray-800">☀️ Level {currentLevel}</p>
               </div>
               <div className="text-6xl">🎖️</div>
             </div>
@@ -174,12 +173,12 @@ function StudentProfile({ student, skills, onRefresh }: StudentProfileProps) {
                         <p className="text-xs text-gray-500">{skillInfo.en}</p>
                       </div>
                     </div>
-                    <span className="font-bold text-lg text-green-600">{value}/100</span>
+                    <span className="font-bold text-lg text-green-600">{value as number}/100</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-3">
                     <div
                       className="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full transition-all"
-                      style={{ width: `${value}%` }}
+                      style={{ width: `${value as number}%` }}
                     />
                   </div>
                 </div>

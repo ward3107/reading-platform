@@ -31,8 +31,6 @@ function MissionsPage({ classes, onRefresh }: MissionsPageProps) {
   const [selectedClassId, setSelectedClassId] = useState<string>(classes[0]?.id || '');
   const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
 
-  const selectedClass = classes.find(c => c.id === selectedClassId);
-
   // Mock missions data - would come from Firestore
   const missions: Mission[] = [
     {
@@ -153,7 +151,6 @@ function MissionsPage({ classes, onRefresh }: MissionsPageProps) {
       {/* Create Mission Modal */}
       {showCreateModal && (
         <CreateMissionModal
-          classId={selectedClassId}
           onClose={() => setShowCreateModal(false)}
           onCreated={() => {
             setShowCreateModal(false);
@@ -230,12 +227,11 @@ function MissionCard({ mission }: MissionCardProps) {
 
 // Create Mission Modal Component
 interface CreateMissionModalProps {
-  classId: string;
   onClose: () => void;
   onCreated: () => void;
 }
 
-function CreateMissionModal({ classId, onClose, onCreated }: CreateMissionModalProps) {
+function CreateMissionModal({ onClose, onCreated }: CreateMissionModalProps) {
   const [formData, setFormData] = useState<CreateMissionFormData>({
     title: '',
     titleEn: '',

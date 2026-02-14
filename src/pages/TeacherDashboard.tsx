@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Link, Outlet, Routes, Route, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
   getClassesByTeacher,
   getTeacherStats,
   getClassAnalytics
 } from '../services/firestore';
-import type { Teacher, Class } from '../types';
+import type { Class } from '../types';
 
 // Dashboard Components
 import ClassesPage from './teacher/ClassesPage';
@@ -37,7 +37,7 @@ function TeacherDashboard() {
   const [classes, setClasses] = useState<ClassWithAnalytics[]>([]);
   const [stats, setStats] = useState<TeacherStats | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<string>('dashboard');
 
   useEffect(() => {
@@ -96,9 +96,20 @@ function TeacherDashboard() {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
+      {/* Mobile backdrop when sidebar open */}
+      <div
+        className={`fixed inset-0 bg-black/50 z-30 transition-opacity md:hidden ${
+          sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setSidebarOpen(false)}
+        aria-hidden
+      />
+
+      {/* Sidebar: overlay on mobile, inline on md+ */}
       <aside
-        className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-slate-800 text-white transition-all duration-300 flex flex-col`}
+        className={`fixed md:relative inset-y-0 left-0 z-40 flex flex-col bg-slate-800 text-white transition-all duration-300 ${
+          sidebarOpen ? 'w-64 translate-x-0' : 'w-20 -translate-x-full md:translate-x-0'
+        }`}
       >
         {/* Logo/Brand */}
         <div className="p-4 border-b border-slate-700">
@@ -120,7 +131,10 @@ function TeacherDashboard() {
           {navigation.map((item) => (
             <button
               key={item.id}
-              onClick={() => setCurrentPage(item.id)}
+              onClick={() => {
+                setCurrentPage(item.id);
+                if (typeof globalThis.window !== 'undefined' && globalThis.window.innerWidth < 768) setSidebarOpen(false);
+              }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                 currentPage === item.id
                   ? 'bg-teal-500 text-white shadow-lg'
@@ -164,21 +178,23 @@ function TeacherDashboard() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <header className="bg-white shadow-sm px-4 md:px-6 py-3 md:py-4 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 md:gap-4 min-w-0">
             <button
+              type="button"
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors shrink-0"
+              aria-label={sidebarOpen ? 'Close menu' : 'Open menu'}
             >
               <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <h2 className="text-2xl font-bold text-gray-800">
+            <h2 className="text-lg md:text-2xl font-bold text-gray-800 truncate">
               {navigation.find(n => n.id === currentPage)?.nameEn}
             </h2>
           </div>
-          <div className="text-sm text-gray-500">
+          <div className="text-xs md:text-sm text-gray-500 shrink-0 hidden sm:block">
             {new Date().toLocaleDateString('he-IL', {
               weekday: 'long',
               year: 'numeric',
@@ -189,7 +205,7 @@ function TeacherDashboard() {
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto p-4 md:p-6">
           {currentPage === 'dashboard' && (
             <DashboardHome
               classes={classes}

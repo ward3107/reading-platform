@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { createClass, updateClass, deleteClass } from '../../services/firestore';
+import { deleteClass } from '../../services/firestore';
 import type { Class } from '../../types';
 
 interface ClassesPageProps {

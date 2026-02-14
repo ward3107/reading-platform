@@ -58,7 +58,7 @@ function SettingsPage({ teacher, onRefresh }: SettingsPageProps) {
           {activeTab === 'profile' && <ProfileSettings teacher={teacher} onSave={handleSave} saving={saving} />}
           {activeTab === 'notifications' && <NotificationSettings onSave={handleSave} saving={saving} />}
           {activeTab === 'missions' && <MissionSettings onSave={handleSave} saving={saving} />}
-          {activeTab === 'account' && <AccountSettings teacher={teacher} onSave={handleSave} saving={saving} />}
+          {activeTab === 'account' && <AccountSettings teacher={teacher} />}
         </div>
       </div>
     </div>
@@ -341,11 +341,9 @@ function MissionSettings({ onSave, saving }: MissionSettingsProps) {
 // Account Settings Component
 interface AccountSettingsProps {
   teacher: Teacher;
-  onSave: () => void;
-  saving: boolean;
 }
 
-function AccountSettings({ teacher, onSave, saving }: AccountSettingsProps) {
+function AccountSettings({ teacher }: AccountSettingsProps) {
   return (
     <div className="max-w-2xl space-y-6">
       <h3 className="text-lg font-semibold text-gray-800 mb-4">

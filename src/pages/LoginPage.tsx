@@ -1,6 +1,14 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import {
+  validate,
+  teacherLoginSchema,
+  studentLoginSchema,
+  isRateLimited,
+  resetRateLimit,
+  sanitizeString
+} from '../utils/validation';
 
 interface LoginPageProps {
   defaultMode?: 'teacher' | 'student' | null;
@@ -13,6 +21,13 @@ interface FormData {
   studentId: string;
 }
 
+interface FormErrors {
+  email?: string;
+  password?: string;
+  classCode?: string;
+  studentId?: string;
+}
+
 function LoginPage({ defaultMode = null }: LoginPageProps) {
   const [mode, setMode] = useState<'select' | 'teacher' | 'student'>(defaultMode || 'select');
   const [formData, setFormData] = useState<FormData>({
@@ -21,19 +36,52 @@ function LoginPage({ defaultMode = null }: LoginPageProps) {
     classCode: '',
     studentId: ''
   });
+  const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const [rateLimitInfo, setRateLimitInfo] = useState<{ remainingMs: number } | null>(null);
   const { signInAsTeacher, signInAsStudent } = useAuth();
   const navigate = useNavigate();
+
+  const formatRemainingTime = (ms: number): string => {
+    const minutes = Math.ceil(ms / 60000);
+    return `${minutes} minute${minutes > 1 ? 's' : ''}`;
+  };
 
   const handleTeacherLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
+    setFormErrors({});
+
+    // Sanitize inputs
+    const sanitizedData = {
+      email: sanitizeString(formData.email).toLowerCase(),
+      password: formData.password // Don't sanitize password
+    };
+
+    // Validate inputs
+    const validation = validate(teacherLoginSchema, sanitizedData);
+    if (!validation.success) {
+      setFormErrors(validation.errors as FormErrors);
+      return;
+    }
+
+    // Check rate limiting
+    const rateLimitKey = `login_teacher_${sanitizedData.email}`;
+    const rateCheck = isRateLimited(rateLimitKey, 5, 15 * 60 * 1000); // 5 attempts per 15 minutes
+
+    if (rateCheck.limited) {
+      setRateLimitInfo({ remainingMs: rateCheck.remainingMs });
+      setError(`Too many login attempts. Please try again in ${formatRemainingTime(rateCheck.remainingMs)}.`);
+      return;
+    }
+
     setLoading(true);
 
-    const result = await signInAsTeacher(formData.email, formData.password);
+    const result = await signInAsTeacher(sanitizedData.email, sanitizedData.password);
 
     if (result.success) {
+      resetRateLimit(rateLimitKey);
       navigate('/teacher');
     } else {
       setError(result.error || 'Login failed');
@@ -44,11 +92,37 @@ function LoginPage({ defaultMode = null }: LoginPageProps) {
   const handleStudentLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
+    setFormErrors({});
+
+    // Sanitize inputs
+    const sanitizedData = {
+      classCode: sanitizeString(formData.classCode).toUpperCase(),
+      studentId: sanitizeString(formData.studentId)
+    };
+
+    // Validate inputs
+    const validation = validate(studentLoginSchema, sanitizedData);
+    if (!validation.success) {
+      setFormErrors(validation.errors as FormErrors);
+      return;
+    }
+
+    // Check rate limiting
+    const rateLimitKey = `login_student_${sanitizedData.classCode}_${sanitizedData.studentId}`;
+    const rateCheck = isRateLimited(rateLimitKey, 5, 15 * 60 * 1000); // 5 attempts per 15 minutes
+
+    if (rateCheck.limited) {
+      setRateLimitInfo({ remainingMs: rateCheck.remainingMs });
+      setError(`Too many login attempts. Please try again in ${formatRemainingTime(rateCheck.remainingMs)}.`);
+      return;
+    }
+
     setLoading(true);
 
-    const result = await signInAsStudent(formData.classCode, formData.studentId);
+    const result = await signInAsStudent(sanitizedData.classCode, sanitizedData.studentId);
 
     if (result.success) {
+      resetRateLimit(rateLimitKey);
       navigate('/student');
     } else {
       setError(result.error || 'Login failed');
@@ -59,6 +133,8 @@ function LoginPage({ defaultMode = null }: LoginPageProps) {
   const handleBackToSelect = () => {
     setMode('select');
     setError('');
+    setFormErrors({});
+    setRateLimitInfo(null);
     setFormData({ email: '', password: '', classCode: '', studentId: '' });
   };
 
@@ -172,10 +248,16 @@ function LoginPage({ defaultMode = null }: LoginPageProps) {
                   required
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
+                    formErrors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                  }`}
                   placeholder="teacher@school.il"
                   dir="ltr"
+                  maxLength={255}
                 />
+                {formErrors.email && (
+                  <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
+                )}
               </div>
 
               <div>
@@ -187,10 +269,16 @@ function LoginPage({ defaultMode = null }: LoginPageProps) {
                   required
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all ${
+                    formErrors.password ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                  }`}
                   placeholder="••••••••"
                   dir="ltr"
+                  maxLength={128}
                 />
+                {formErrors.password && (
+                  <p className="text-red-500 text-sm mt-1">{formErrors.password}</p>
+                )}
               </div>
 
               {error && (
@@ -201,7 +289,7 @@ function LoginPage({ defaultMode = null }: LoginPageProps) {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !!rateLimitInfo}
                 className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'טוען... / Loading...' : 'התחבר / Login'}
@@ -248,11 +336,16 @@ function LoginPage({ defaultMode = null }: LoginPageProps) {
                   type="text"
                   required
                   value={formData.classCode}
-                  onChange={(e) => setFormData({ ...formData, classCode: e.target.value.toUpperCase() })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-center text-lg tracking-widest"
+                  onChange={(e) => setFormData({ ...formData, classCode: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '') })}
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all text-center text-lg tracking-widest ${
+                    formErrors.classCode ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-teal-500'
+                  }`}
                   placeholder="ABC123"
-                  maxLength={10}
+                  maxLength={20}
                 />
+                {formErrors.classCode && (
+                  <p className="text-red-500 text-sm mt-1 text-center">{formErrors.classCode}</p>
+                )}
               </div>
 
               <div>
@@ -263,22 +356,27 @@ function LoginPage({ defaultMode = null }: LoginPageProps) {
                   type="text"
                   required
                   value={formData.studentId}
-                  onChange={(e) => setFormData({ ...formData, studentId: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all text-center text-lg"
+                  onChange={(e) => setFormData({ ...formData, studentId: e.target.value.replace(/[^A-Za-z0-9]/g, '') })}
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:border-transparent transition-all text-center text-lg ${
+                    formErrors.studentId ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-teal-500'
+                  }`}
                   placeholder="12345"
                   maxLength={20}
                 />
+                {formErrors.studentId && (
+                  <p className="text-red-500 text-sm mt-1 text-center">{formErrors.studentId}</p>
+                )}
               </div>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-center">
                   {error}
                 </div>
               )}
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !!rateLimitInfo}
                 className="w-full bg-teal-500 text-white py-3 rounded-lg font-semibold hover:bg-teal-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'טוען... / Loading...' : 'התחבר / Login'}

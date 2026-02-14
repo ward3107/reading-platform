@@ -46,7 +46,7 @@ interface PublicRouteProps {
 }
 
 function PublicRoute({ children }: PublicRouteProps) {
-  const { user, student, userType, loading } = useAuth();
+  const { userType, loading } = useAuth();
 
   if (loading) {
     return (
