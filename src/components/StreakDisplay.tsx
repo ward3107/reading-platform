@@ -76,7 +76,7 @@ export function StreakDisplay({ streakData }: StreakDisplayProps) {
               className={`w-8 h-8 rounded-full flex items-center justify-center text-lg transition-all ${
                 day.active
                   ? 'bg-white text-emerald-600 shadow-lg font-bold ring-2 ring-white/50'
-                  : 'bg-white/30 text-white border-2 border-white/40'
+                  : 'bg-white/40 text-white/90 border-2 border-white/60'
               }`}
             >
               {day.active ? '✓' : '·'}
