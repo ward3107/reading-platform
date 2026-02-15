@@ -1,7 +1,7 @@
 // Progress Visualization Components
 // Simple chart components using SVG (no external dependencies)
 
-import type { StudentSkills } from '../../types';
+import type { StudentSkills } from '../types';
 
 // ============================================
 // WEEKLY ACTIVITY CHART
@@ -15,7 +15,6 @@ interface WeeklyActivityChartProps {
 
 export function WeeklyActivityChart({ data, title = 'Weekly Activity', titleHe = 'פעילות שבועית' }: WeeklyActivityChartProps) {
   const maxValue = Math.max(...data.map(d => d.value), 1);
-  const barWidth = 100 / data.length;
 
   return (
     <div className="bg-white rounded-xl shadow p-5">
@@ -56,7 +55,7 @@ export function SkillsRadarChart({ skills }: SkillsRadarChartProps) {
     { name: 'Fluency', value: skills.fluencyLevel || 10 },
     { name: 'Comprehension', value: skills.comprehensionLevel || 10 },
     { name: 'Vocabulary', value: skills.vocabularyLevel || 10 },
-    { name: 'Grammar', value: skills.grammarLevel || 10 }
+    { name: 'Reading', value: skills.readingLevel || 10 }
   ];
 
   const centerX = 100;

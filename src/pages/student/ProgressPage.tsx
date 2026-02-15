@@ -14,7 +14,9 @@ function ProgressPage({ student, skills, streakDays, onBack }: ProgressPageProps
     fluencyLevel: 10,
     comprehensionLevel: 10,
     vocabularyLevel: 10,
-    grammarLevel: 10
+    readingLevel: 10,
+    strengths: [],
+    areasForImprovement: []
   };
 
   const studentData = {

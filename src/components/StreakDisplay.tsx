@@ -1,10 +1,8 @@
-import { useEffect } from 'react';
 import type { StreakData, StreakReward } from '../utils/dailyStreaks';
 import {
   getStreakEmoji,
   getStreakMessage,
   getWeekActivityDisplay,
-  getUnclaimedRewards,
   STREAK_REWARDS
 } from '../utils/dailyStreaks';
 
@@ -42,7 +40,7 @@ interface StreakDisplayProps {
   onRecordActivity?: () => void;
 }
 
-export function StreakDisplay({ streakData, onRecordActivity }: StreakDisplayProps) {
+export function StreakDisplay({ streakData }: StreakDisplayProps) {
   const message = getStreakMessage(streakData);
   const weekActivity = getWeekActivityDisplay(streakData);
 
@@ -192,8 +190,6 @@ interface StreakMilestonesProps {
 }
 
 export function StreakMilestones({ streakData, onClaim }: StreakMilestonesProps) {
-  const unclaimedRewards = getUnclaimedRewards(streakData);
-
   return (
     <div className="bg-white rounded-xl shadow p-5">
       <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">

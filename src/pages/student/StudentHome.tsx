@@ -1,6 +1,6 @@
 import type { Student } from '../../types';
 import type { StreakData } from '../../utils/dailyStreaks';
-import { StreakDisplay, StreakMilestones } from '../../components/StreakDisplay';
+import { StreakDisplay } from '../../components/StreakDisplay';
 
 interface DemoMission {
   id: string;

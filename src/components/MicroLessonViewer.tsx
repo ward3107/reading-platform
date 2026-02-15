@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { MicroLesson, LessonSection, QuizQuestion } from '../data/microLessons';
+import type { MicroLesson, LessonSection } from '../data/microLessons';
 import { useSpeechSynthesis } from '../hooks/useSpeechSynthesis';
 
 interface MicroLessonViewerProps {

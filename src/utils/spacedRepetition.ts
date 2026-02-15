@@ -5,9 +5,6 @@ import type { VocabularyProgress } from '../types';
  * Used to schedule vocabulary reviews at optimal intervals
  */
 
-// Default intervals for new words (in days)
-const NEW_WORD_INTERVALS = [1, 3, 7, 14, 30, 60, 120];
-
 /**
  * Calculate the next review date based on performance
  */

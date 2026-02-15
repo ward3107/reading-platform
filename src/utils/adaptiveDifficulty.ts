@@ -1,5 +1,3 @@
-import type { Student } from '../types';
-
 /**
  * Adaptive Difficulty System
  * Adjusts story/mission difficulty based on student performance
@@ -215,7 +213,7 @@ export function shouldLevelDown(state: AdaptiveState): boolean {
  */
 export function getHint(
   questionType: 'comprehension' | 'vocabulary' | 'translation',
-  storyText?: string
+  _storyText?: string
 ): string {
   const hints = {
     comprehension: [

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import type { Student } from '../../types';
 import type { MicroLesson } from '../../data/microLessons';
 import {
-  allMicroLessons,
   grammarLessons,
   vocabularyLessons,
   readingLessons,

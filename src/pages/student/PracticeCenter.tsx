@@ -13,14 +13,13 @@ interface PracticeCenterProps {
 }
 
 type PracticeType = 'menu' | 'fillBlank' | 'wordOrder' | 'matching' | 'audio';
-type QuestionState = 'playing' | 'result';
 
 interface PracticeResult {
   correct: number;
   total: number;
 }
 
-function PracticeCenter({ student, onBack }: PracticeCenterProps) {
+function PracticeCenter({ onBack }: PracticeCenterProps) {
   const [practiceType, setPracticeType] = useState<PracticeType>('menu');
   const [questionIndex, setQuestionIndex] = useState(0);
   const [results, setResults] = useState<PracticeResult>({ correct: 0, total: 0 });

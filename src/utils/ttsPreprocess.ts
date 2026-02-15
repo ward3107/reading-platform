@@ -146,7 +146,7 @@ export function preprocessForTTS(
   }
 
   // Ordinals (e.g. 1st, 2nd, 3rd, 4th)
-  out = out.replace(/\b(\d+)(st|nd|rd|th)\b/gi, (match, num, suffix) => {
+  out = out.replace(/\b(\d+)(st|nd|rd|th)\b/gi, (_match, num, _suffix) => {
     const n = parseInt(num, 10);
     if (n === 1) return 'first';
     if (n === 2) return 'second';

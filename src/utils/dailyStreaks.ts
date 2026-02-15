@@ -1,5 +1,3 @@
-import type { Student } from '../types';
-
 /**
  * Daily Streak System
  * Encourages consistent daily practice with streak tracking and rewards
@@ -251,7 +249,7 @@ export function calculateDailyBonus(streakData: StreakData): number {
 /**
  * Get day name from date
  */
-function getDayName(dateStr: string): string {
+export function getDayName(dateStr: string): string {
   const date = new Date(dateStr);
   return date.toLocaleDateString('en-US', { weekday: 'short' });
 }

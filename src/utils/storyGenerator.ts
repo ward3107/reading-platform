@@ -32,7 +32,11 @@ const CHARACTERS = {
 };
 
 // Level-specific vocabulary
-const VOCABULARY_BY_LEVEL = {
+const VOCABULARY_BY_LEVEL: Record<number, {
+  words: string[];
+  sentenceStructures: string[];
+  maxWordsPerSentence: number;
+}> = {
   1: {
     words: ['play', 'run', 'eat', 'sleep', 'happy', 'sad', 'big', 'small', 'red', 'blue', 'mom', 'dad', 'dog', 'cat', 'ball', 'book', 'home', 'school', 'friend', 'love'],
     sentenceStructures: ['Subject + verb + object', 'Subject + is + adjective', 'Simple present tense'],
@@ -61,7 +65,7 @@ const VOCABULARY_BY_LEVEL = {
 };
 
 // Theme templates for story generation
-const THEME_TEMPLATES = {
+const THEME_TEMPLATES: Record<number, Array<{ theme: string; context: string }>> = {
   1: [
     { theme: 'family', context: 'spending time with family members' },
     { theme: 'friendship', context: 'making new friends' },

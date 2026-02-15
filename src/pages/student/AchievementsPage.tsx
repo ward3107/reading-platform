@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Student } from '../../types';
 import type { Achievement } from '../../data/achievements';
-import { AchievementsGallery, RecentAchievements } from '../../components/AchievementsDisplay';
+import { AchievementsGallery } from '../../components/AchievementsDisplay';
 
 interface AchievementsPageProps {
   student: Student;

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { AdaptiveState } from '../utils/adaptiveDifficulty';
-import { getDifficultyLabel, getDifficultyColor } from '../utils/adaptiveDifficulty';
+import { getDifficultyColor } from '../utils/adaptiveDifficulty';
 
 interface DifficultyIndicatorProps {
   currentDifficulty: number;
@@ -35,7 +35,7 @@ interface PerformanceIndicatorProps {
 }
 
 export function PerformanceIndicator({ state }: PerformanceIndicatorProps) {
-  const { consecutiveCorrect, consecutiveIncorrect, recentPerformance } = state;
+  const { consecutiveCorrect, recentPerformance } = state;
 
   const successRate = recentPerformance.length > 0
     ? Math.round((recentPerformance.filter(p => p.correct).length / recentPerformance.length) * 100)

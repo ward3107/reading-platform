@@ -239,8 +239,7 @@ function MissionView({ stories, currentStory, student, onCompleteStory, onClose 
     dismissLevelUp,
     dismissLevelDown,
     getHintForQuestion,
-    currentDifficulty,
-    recommendedDifficulty
+    currentDifficulty
   } = useAdaptiveDifficulty(student);
 
   const story = stories[currentStory];

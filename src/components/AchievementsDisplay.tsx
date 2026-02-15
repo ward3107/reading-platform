@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import type { Achievement, UserAchievement } from '../data/achievements';
+import type { Achievement } from '../data/achievements';
 import {
   achievements,
   getRarityColor,
   getRarityBgColor,
-  getNewlyUnlockedAchievements,
-  checkAchievementUnlocked
+  getNewlyUnlockedAchievements
 } from '../data/achievements';
 
 interface AchievementsGalleryProps {
