@@ -71,12 +71,12 @@ export function StreakDisplay({ streakData }: StreakDisplayProps) {
       <div className="flex justify-between items-center bg-white/20 backdrop-blur-sm rounded-xl p-3">
         {weekActivity.map((day, idx) => (
           <div key={idx} className="flex flex-col items-center">
-            <span className="text-xs text-white font-semibold mb-1">{day.day}</span>
+            <span className="text-xs text-gray-800 font-semibold mb-1">{day.day}</span>
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-lg transition-all ${
                 day.active
                   ? 'bg-white text-emerald-600 shadow-lg font-bold ring-2 ring-white/50'
-                  : 'bg-white/40 text-white/90 border-2 border-white/60'
+                  : 'bg-white/60 text-gray-700 border-2 border-white/80'
               }`}
             >
               {day.active ? '✓' : '·'}
