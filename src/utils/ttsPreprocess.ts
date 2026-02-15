@@ -3,8 +3,11 @@
  * Only the returned string is spoken; display text is unchanged.
  */
 
+/** Type for pattern-replacement pairs */
+type PatternReplacement = [pattern: RegExp | string, replacement: string];
+
 /** Expand abbreviations and symbols so TTS pronounces them correctly. */
-const ABBREVIATIONS: [RegExp | string, string][] = [
+const ABBREVIATIONS: PatternReplacement[] = [
   [/\betc\.?\s/gi, 'et cetera '],
   [/\be\.g\.?\s/gi, 'for example '],
   [/\bi\.e\.?\s/gi, 'that is '],

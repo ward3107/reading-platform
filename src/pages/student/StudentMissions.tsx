@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Student, Story } from '../../types';
+import type { DemoMission } from '../../services/database/demo-data';
 import { getStoriesForMission } from '../../services/stories';
 import { useSpeechSynthesis } from '../../hooks/useSpeechSynthesis';
 import { useAdaptiveDifficulty } from '../../hooks/useAdaptiveDifficulty';
@@ -10,19 +11,6 @@ import {
   HintButton,
   HintDisplay
 } from '../../components/AdaptiveDifficulty';
-
-interface DemoMission {
-  id: string;
-  title: string;
-  titleEn: string;
-  type: string;
-  targetStories: number;
-  points: number;
-  status: string;
-  progress: number;
-  assignedTo: number;
-  completedBy: number;
-}
 
 interface StudentMissionsProps {
   student: Student;
@@ -36,7 +24,6 @@ interface MissionCardProps {
 }
 
 interface MissionViewProps {
-  mission: DemoMission;
   stories: Story[];
   currentStory: number;
   student: Student;
@@ -83,7 +70,6 @@ function StudentMissions({ student, missions, onRefresh }: StudentMissionsProps)
   if (showMissionDetail && selectedMission) {
     return (
       <MissionView
-        mission={selectedMission}
         stories={missionStories}
         currentStory={currentStory}
         student={student}

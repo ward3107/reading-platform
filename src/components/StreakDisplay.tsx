@@ -28,7 +28,7 @@ export function StreakBadge({ streak, size = 'md', showLabel = true }: StreakBad
   if (streak === 0) return null;
 
   return (
-    <div className={`inline-flex items-center gap-2 bg-gradient-to-r from-orange-400 to-red-500 text-white rounded-full font-bold shadow-lg ${sizeClasses[size]}`}>
+    <div className={`inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full font-bold shadow-lg shadow-orange-500/30 ${sizeClasses[size]}`}>
       <span className={emojiSize[size]}>{getStreakEmoji(streak)}</span>
       {showLabel && <span>{streak} day{streak !== 1 ? 's' : ''}</span>}
     </div>
@@ -45,10 +45,10 @@ export function StreakDisplay({ streakData }: StreakDisplayProps) {
   const weekActivity = getWeekActivityDisplay(streakData);
 
   const messageColors = {
-    encouragement: 'from-green-400 to-teal-500',
-    warning: 'from-orange-400 to-red-500',
-    celebration: 'from-purple-400 to-pink-500',
-    neutral: 'from-gray-400 to-gray-500'
+    encouragement: 'from-emerald-500 to-teal-600',
+    warning: 'from-orange-500 to-red-500',
+    celebration: 'from-purple-500 to-pink-500',
+    neutral: 'from-slate-500 to-slate-600'
   };
 
   return (
@@ -68,15 +68,15 @@ export function StreakDisplay({ streakData }: StreakDisplayProps) {
       </div>
 
       {/* Week Activity */}
-      <div className="flex justify-between items-center bg-white/20 rounded-xl p-3">
+      <div className="flex justify-between items-center bg-white/15 backdrop-blur-sm rounded-xl p-3">
         {weekActivity.map((day, idx) => (
           <div key={idx} className="flex flex-col items-center">
-            <span className="text-xs opacity-80 mb-1">{day.day}</span>
+            <span className="text-xs opacity-90 mb-1 font-medium">{day.day}</span>
             <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-lg transition-all ${
                 day.active
-                  ? 'bg-white text-orange-500'
-                  : 'bg-white/30 text-white/50'
+                  ? 'bg-white text-emerald-600 shadow-lg shadow-black/10 font-bold'
+                  : 'bg-white/25 text-white/70 border border-white/30'
               }`}
             >
               {day.active ? '✓' : '·'}
