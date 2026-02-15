@@ -1,7 +1,19 @@
 // Progress Visualization Components
 // Simple chart components using SVG (no external dependencies)
 
-import type { StudentSkills } from '../types';
+// Skills can come from different sources with different structures
+interface SkillsData {
+  fluencyLevel?: number;
+  comprehensionLevel?: number;
+  vocabularyLevel?: number;
+  readingLevel?: number;
+  skills?: {
+    fluency?: number;
+    comprehension?: number;
+    vocabulary?: number;
+    grammar?: number;
+  };
+}
 
 // ============================================
 // WEEKLY ACTIVITY CHART
@@ -47,15 +59,23 @@ export function WeeklyActivityChart({ data, title = 'Weekly Activity', titleHe =
 // ============================================
 
 interface SkillsRadarChartProps {
-  skills: StudentSkills;
+  skills: SkillsData;
 }
 
 export function SkillsRadarChart({ skills }: SkillsRadarChartProps) {
+  // Normalize skills data from either flat or nested structure
+  const getSkillValue = (flatKey: keyof SkillsData, nestedKey: keyof NonNullable<SkillsData['skills']>): number => {
+    if (skills.skills && skills.skills[nestedKey] !== undefined) {
+      return skills.skills[nestedKey] || 10;
+    }
+    return (skills[flatKey] as number) || 10;
+  };
+
   const skillData = [
-    { name: 'Fluency', value: skills.fluencyLevel || 10 },
-    { name: 'Comprehension', value: skills.comprehensionLevel || 10 },
-    { name: 'Vocabulary', value: skills.vocabularyLevel || 10 },
-    { name: 'Reading', value: skills.readingLevel || 10 }
+    { name: 'Fluency', value: getSkillValue('fluencyLevel', 'fluency') },
+    { name: 'Comprehension', value: getSkillValue('comprehensionLevel', 'comprehension') },
+    { name: 'Vocabulary', value: getSkillValue('vocabularyLevel', 'vocabulary') },
+    { name: 'Reading', value: getSkillValue('readingLevel', 'grammar') }
   ];
 
   const centerX = 100;
@@ -387,11 +407,20 @@ interface ProgressVisualizationProps {
     currentLevel: number;
     missionsCompleted: number;
   };
-  skills: StudentSkills;
+  skills: SkillsData | null;
   streakDays: number;
 }
 
 export function ProgressVisualization({ student, skills, streakDays }: ProgressVisualizationProps) {
+  // Default skills if null
+  const safeSkills: SkillsData = skills || {
+    fluencyLevel: 10,
+    comprehensionLevel: 10,
+    vocabularyLevel: 10,
+    readingLevel: 10,
+    skills: { fluency: 10, comprehension: 10, vocabulary: 10, grammar: 10 }
+  };
+
   // Demo data for charts
   const weeklyActivity = [
     { day: 'Sun', value: 2 },
@@ -447,7 +476,7 @@ export function ProgressVisualization({ student, skills, streakDays }: ProgressV
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <WeeklyActivityChart data={weeklyActivity} />
-        <SkillsRadarChart skills={skills} />
+        <SkillsRadarChart skills={safeSkills} />
       </div>
 
       {/* Progress Chart */}
@@ -470,14 +499,14 @@ export function ProgressVisualization({ student, skills, streakDays }: ProgressV
             labelHe="לרמה הבאה"
           />
           <CircularProgress
-            value={skills.fluencyLevel || 10}
+            value={safeSkills.fluencyLevel || safeSkills.skills?.fluency || 10}
             size={140}
             color="#6366f1"
             label="Fluency"
             labelHe="שטף"
           />
           <CircularProgress
-            value={skills.comprehensionLevel || 10}
+            value={safeSkills.comprehensionLevel || safeSkills.skills?.comprehension || 10}
             size={140}
             color="#ec4899"
             label="Comprehension"

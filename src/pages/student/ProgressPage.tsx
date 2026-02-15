@@ -1,22 +1,28 @@
-import type { Student, StudentSkills } from '../../types';
+import type { Student } from '../../types';
+import type { StudentSkillsData } from '../../services/firestore';
 import { ProgressVisualization } from '../../components/ProgressCharts';
 
 interface ProgressPageProps {
   student: Student;
-  skills: StudentSkills | null;
+  skills: StudentSkillsData | null;
   streakDays: number;
   onBack: () => void;
 }
 
 function ProgressPage({ student, skills, streakDays, onBack }: ProgressPageProps) {
   // Default skills if not available
-  const defaultSkills: StudentSkills = {
-    fluencyLevel: 10,
-    comprehensionLevel: 10,
-    vocabularyLevel: 10,
+  const defaultSkills: StudentSkillsData = {
+    id: 'default',
+    studentId: student.id,
     readingLevel: 10,
-    strengths: [],
-    areasForImprovement: []
+    skills: {
+      fluency: 10,
+      comprehension: 10,
+      vocabulary: 10,
+      grammar: 10
+    },
+    skillHistory: [],
+    lastUpdated: new Date()
   };
 
   const studentData = {

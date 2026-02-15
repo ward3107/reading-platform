@@ -33,6 +33,7 @@ export interface Student {
   isActive: boolean;
   skills?: StudentSkills;
   recentStories?: string[];
+  lastActiveAt?: Date | { toDate: () => Date };
 }
 
 export interface StudentSkills {
@@ -51,7 +52,8 @@ export interface Teacher {
   email: string;
   school: string;
   isActive: boolean;
-  createdAt?: string;
+  createdAt?: Date | { toDate: () => Date };
+  phone?: string;
 }
 
 // Class Types
@@ -64,6 +66,7 @@ export interface Class {
   studentCount: number;
   isActive: boolean;
   analytics?: ClassAnalytics;
+  description?: string;
 }
 
 export interface ClassAnalytics {

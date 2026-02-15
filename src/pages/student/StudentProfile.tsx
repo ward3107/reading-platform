@@ -1,8 +1,9 @@
 import type { Student } from '../../types';
+import type { StudentSkillsData } from '../../services/firestore';
 
 interface StudentProfileProps {
   student: Student;
-  skills: any;
+  skills: StudentSkillsData | null;
   onRefresh?: () => void;
 }
 

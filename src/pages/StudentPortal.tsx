@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getMissionsForStudent, getStudentSkills } from '../services/firestore';
+import type { StudentSkillsData } from '../services/firestore';
 import { useStreak } from '../hooks/useStreak';
 
 // Student Pages
@@ -34,7 +35,7 @@ function StudentPortal() {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState<string>('home');
   const [missions, setMissions] = useState<DemoMission[]>([]);
-  const [skills, setSkills] = useState<any>(null);
+  const [skills, setSkills] = useState<StudentSkillsData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
   const [showStreakWarning, setShowStreakWarning] = useState<boolean>(false);

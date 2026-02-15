@@ -1,5 +1,6 @@
 import type { Student } from '../../types';
 import type { StreakData } from '../../utils/dailyStreaks';
+import type { StudentSkillsData } from '../../services/firestore';
 import { StreakDisplay } from '../../components/StreakDisplay';
 
 interface DemoMission {
@@ -18,7 +19,7 @@ interface DemoMission {
 interface StudentHomeProps {
   student: Student;
   missions: DemoMission[];
-  skills: any;
+  skills: StudentSkillsData | null;
   streakData?: StreakData;
   onRefresh: () => void;
   onStartMission: (missionId: string) => void;

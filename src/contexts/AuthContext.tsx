@@ -145,8 +145,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setTeacher(teacherData);
       setUserType('teacher');
       return { success: true, data: teacherData };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'An unknown error occurred';
+      return { success: false, error: message };
     }
   };
 
@@ -195,8 +196,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setUser({ uid: studentId, email: studentData.email || '' });
 
       return { success: true, data: studentData };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'An unknown error occurred';
+      return { success: false, error: message };
     }
   };
 
@@ -211,8 +213,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setStudent(null);
       setUserType(null);
       return { success: true };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'An unknown error occurred';
+      return { success: false, error: message };
     }
   };
 

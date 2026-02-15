@@ -195,7 +195,10 @@ interface StudentRowProps {
 }
 
 function StudentRow({ student }: StudentRowProps) {
-  const daysSinceActive = Math.floor((Date.now() - ((student as any).lastActiveAt?.toDate?.()?.getTime() || Date.now())) / (1000 * 60 * 60 * 24));
+  const lastActiveTime = student.lastActiveAt && typeof student.lastActiveAt === 'object' && 'toDate' in student.lastActiveAt
+    ? student.lastActiveAt.toDate().getTime()
+    : Date.now();
+  const daysSinceActive = Math.floor((Date.now() - lastActiveTime) / (1000 * 60 * 60 * 24));
   const isActive = daysSinceActive <= 7;
 
   return (
@@ -265,8 +268,9 @@ function AddStudentModal({ classId, onClose, onAdded }: AddStudentModalProps) {
       await createStudent(formData);
       onAdded();
       onClose();
-    } catch (error: any) {
-      alert('שגיאה ביצירת תלמיד: ' + error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'An unknown error occurred';
+      alert('שגיאה ביצירת תלמיד: ' + message);
     } finally {
       setLoading(false);
     }

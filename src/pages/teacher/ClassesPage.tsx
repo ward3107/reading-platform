@@ -36,7 +36,7 @@ function ClassesPage({ classes, onRefresh }: ClassesPageProps) {
       name: cls.name,
       nameEn: cls.nameEn || '',
       grade: cls.grade || '',
-      description: (cls as any).description || ''
+      description: cls.description || ''
     });
     setShowModal(true);
   };

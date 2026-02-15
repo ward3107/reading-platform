@@ -84,7 +84,7 @@ function ProfileSettings({ teacher, onSave, saving }: ProfileSettingsProps) {
     name: teacher?.name || '',
     email: teacher?.email || '',
     school: teacher?.school || '',
-    phone: (teacher as any)?.phone || ''
+    phone: teacher?.phone || ''
   });
 
   return (
@@ -381,7 +381,9 @@ function AccountSettings({ teacher }: AccountSettingsProps) {
           חשבון נוצר בתאריך: / Account created:
         </p>
         <p className="text-xs text-gray-500">
-          {(teacher as any)?.createdAt?.toDate?.()?.toLocaleDateString('he-IL') || 'N/A'}
+          {teacher?.createdAt && typeof teacher.createdAt === 'object' && 'toDate' in teacher.createdAt
+            ? teacher.createdAt.toDate().toLocaleDateString('he-IL')
+            : 'N/A'}
         </p>
       </div>
     </div>
