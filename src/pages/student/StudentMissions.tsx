@@ -179,6 +179,8 @@ function MissionCard({ mission, onStart }: MissionCardProps) {
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3">
             <div
+              aria-label={`Progress ${progress}%`}
+              title={`Progress ${progress}%`}
               className="bg-gradient-to-l from-purple-500 to-purple-600 h-3 rounded-full transition-all"
               style={{ width: `${progress}%` }}
             />
@@ -309,7 +311,9 @@ function MissionView({ stories, currentStory, student, onCompleteStory, onClose 
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-          >
+            aria-label="Close"
+            title="Close"
+            >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -324,13 +328,15 @@ function MissionView({ stories, currentStory, student, onCompleteStory, onClose 
           <div
             className="bg-purple-500 h-2 rounded-full transition-all"
             style={{ width: `${progress}%` }}
+            aria-label={`Progress ${progress}%`}
+            title={`Progress ${progress}%`}
           />
         </div>
         {/* Task Progress */}
         <div className="flex items-center justify-center gap-2">
           {tasks.map((_, idx) => (
             <div
-              key={idx}
+              key={idx} title={`Task ${idx + 1}`} aria-label={`Task ${idx + 1}`}
               className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
                 idx < currentTask
                   ? 'bg-green-500 text-white'
@@ -338,7 +344,7 @@ function MissionView({ stories, currentStory, student, onCompleteStory, onClose 
                   ? 'bg-purple-500 text-white'
                   : 'bg-gray-200 text-gray-500'
               }`}
-            >
+              >
               {idx < currentTask ? '✓' : idx + 1}
             </div>
           ))}
@@ -360,6 +366,7 @@ function MissionView({ stories, currentStory, student, onCompleteStory, onClose 
               onClick={() => (isSpeaking ? stop() : speak(story.text))}
               className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-white transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 ${isSpeaking ? 'bg-red-600 hover:bg-red-700' : 'bg-purple-600 hover:bg-purple-700'}`}
               aria-label={isSpeaking ? 'Stop reading' : 'Listen to story'}
+              title={isSpeaking ? 'Stop reading' : 'Listen to story'}
             >
               {isSpeaking ? (
                 <>
@@ -411,7 +418,9 @@ function MissionView({ stories, currentStory, student, onCompleteStory, onClose 
                     key={idx}
                     onClick={() => handleAnswer(idx)}
                     className="w-full p-5 border-2 border-gray-200 rounded-xl text-right hover:border-purple-300 hover:bg-purple-50 transition-colors bg-white flex flex-col items-stretch gap-3"
-                  >
+                    aria-label={`Answer ${idx + 1}`}
+                    title={`Answer ${idx + 1}`}
+                    >
                     <span className="ml-2 font-bold text-gray-400">{['א׳', 'ב׳', 'ג׳', 'ד׳'][idx]}</span>
                     <span className="text-gray-800" dir="rtl">{answer}</span>
                     <span className="block text-lg text-gray-600 border-t border-gray-100 pt-2" dir="ltr">
@@ -434,6 +443,8 @@ function MissionView({ stories, currentStory, student, onCompleteStory, onClose 
                           ? 'border-red-500 bg-red-50 text-red-800'
                           : 'border-gray-200 bg-gray-50 text-gray-500'
                       }`}
+                      aria-label={`Answer ${idx + 1}`}
+                      title={`Answer ${idx + 1}`}
                     >
                       <span className="ml-2 font-bold">{['א׳', 'ב׳', 'ג׳', 'ד׳'][idx]}</span>
                       <span dir="rtl">{answer}</span>
@@ -460,12 +471,10 @@ function MissionView({ stories, currentStory, student, onCompleteStory, onClose 
                 <button
                   onClick={handleNextTask}
                   className="w-full py-4 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl font-bold text-lg hover:from-purple-600 hover:to-purple-700 transition-all"
+                  aria-label="Next task"
+                  title={currentTask < tasks.length - 1 ? 'שאלה הבאה / Next Question →' : 'סיים משימה / Complete Mission 🎉'}
                 >
-                  {currentTask < tasks.length - 1
-                    ? `שאלה הבאה / Next Question →`
-                    : currentStory < stories.length - 1
-                    ? 'הסיפור הבא / Next Story →'
-                    : 'סיים משימה / Complete Mission 🎉'}
+                  {currentTask < tasks.length - 1 ? 'שאלה הבאה / Next Question →' : 'סיים משימה / Complete Mission 🎉'}
                 </button>
               </div>
             )}
@@ -480,28 +489,28 @@ export default StudentMissions;
 
 // Generate multiple tasks for a story
 interface Task {
-  type: 'comprehension' | 'vocabulary' | 'translation';
-  questionHe: string;
-  questionEn: string;
-  options: string[];
-  optionsEn?: string[];
-  correctIndex: number;
+  type: 'comprehension' | 'vocabulary' | 'translation'; // type of task
+  questionHe: string; // question in Hebrew
+  questionEn: string; // question in English
+  options: string[]; // options for the question
+  optionsEn?: string[]; // options in English
+  correctIndex: number; // index of the correct answer
 }
 
-function generateTasksForStory(story: Story | undefined): Task[] {
-  if (!story) return [];
+function generateTasksForStory(story: Story | undefined): Task[] { // generate tasks for a story using the story data and return an array of tasks  
+  if (!story) return []; // if the story is not defined, return an empty array  
 
-  const tasks: Task[] = [];
+  const tasks: Task[] = []; // initialize an empty array of tasks  
 
   // Task 1: Main comprehension question (from story data) – Hebrew + English options
-  const mainOptions = story.answerOptions || ['תשובה א׳', 'תשובה ב׳', 'תשובה ג׳', 'תשובה ד׳'];
+  const mainOptions = story.answerOptions || ['תשובה א׳', 'תשובה ב׳', 'תשובה ג׳', 'תשובה ד׳']; // default options if the story data is not defined  
   tasks.push({
-    type: 'comprehension',
-    questionHe: story.comprehensionQuestion || 'מה המשמעות של הסיפור?',
-    questionEn: story.comprehensionQuestionEn || 'What is the meaning of the story?',
-    options: mainOptions,
-    optionsEn: story.answerOptionsEn,
-    correctIndex: story.correctAnswerIndex ?? 0
+    type: 'comprehension', // type of task
+    questionHe: story.comprehensionQuestion || 'מה המשמעות של הסיפור?', // question in Hebrew
+    questionEn: story.comprehensionQuestionEn || 'What is the meaning of the story?', // question in English
+    options: mainOptions, // options for the question
+    optionsEn: story.answerOptionsEn, // options in English
+    correctIndex: story.correctAnswerIndex ?? 0 // index of the correct answer
   });
 
   // Task 2: Vocabulary question (if vocabulary exists)

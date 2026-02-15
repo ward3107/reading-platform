@@ -155,7 +155,7 @@ function StudentPortal() {
 
       {/* Sidebar - Large screens only; no sidebar on mobile/tablet */}
       <aside
-        className="hidden lg:flex flex-col h-screen sticky top-0 z-30 bg-white shadow-xl transition-all duration-300"
+        className="hidden lg:flex flex-col fixed right-0 top-0 bottom-0 z-30 bg-white shadow-xl transition-all duration-300"
         style={{
           width: sidebarCollapsed ? '0px' : '288px',
           transform: sidebarCollapsed ? 'translateX(100%)' : 'translateX(0)',
@@ -254,7 +254,7 @@ function StudentPortal() {
       </button>
 
       {/* Main Content - on mobile/tablet: no sidebar; on lg: sidebar can collapse */}
-      <main className={`flex-1 lg:pt-0 pt-12 pb-20 lg:pb-0 px-4 lg:px-8 transition-all duration-300 ${sidebarCollapsed ? 'lg:pr-4' : ''}`}>
+      <main className={`flex-1 min-h-screen lg:pt-0 pt-12 pb-20 lg:pb-6 px-4 lg:px-8 transition-all duration-300 overflow-y-auto ${sidebarCollapsed ? 'lg:pr-4' : 'lg:pr-[304px]'}`}>
         <div className="w-full py-6 lg:py-8">
           {currentPage === 'home' && (
             <StudentHome

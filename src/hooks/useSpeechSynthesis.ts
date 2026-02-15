@@ -49,8 +49,8 @@ export function useSpeechSynthesis(options: UseSpeechSynthesisOptions = {}) {
   const pendingCountRef = useRef(0);
 
   const stop = useCallback(() => {
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
+    if (globalThis.window !== undefined && globalThis.speechSynthesis) {
+      globalThis.speechSynthesis.cancel();
       pendingCountRef.current = 0;
       setIsSpeaking(false);
       setIsPaused(false);
@@ -59,12 +59,12 @@ export function useSpeechSynthesis(options: UseSpeechSynthesisOptions = {}) {
 
   const speak = useCallback(
     (text: string) => {
-      if (typeof window === 'undefined' || !window.speechSynthesis || !text?.trim()) return;
+      if (globalThis.window === undefined || !globalThis.speechSynthesis || !text?.trim()) return;
 
-      window.speechSynthesis.cancel();
+      globalThis.speechSynthesis.cancel();
       pendingCountRef.current = 0;
 
-      const synth = window.speechSynthesis;
+      const synth = globalThis.speechSynthesis;
       const voice = getPreferredVoice(synth, lang);
 
       const processedText = preprocessForTTS(text, {
@@ -119,18 +119,18 @@ export function useSpeechSynthesis(options: UseSpeechSynthesisOptions = {}) {
   );
 
   const pause = useCallback(() => {
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
+    if (globalThis.window !== undefined && globalThis.speechSynthesis) {
       if (isSpeaking) {
-        window.speechSynthesis.pause();
+        globalThis.speechSynthesis.pause();
         setIsPaused(true);
       }
     }
   }, [isSpeaking]);
 
   const resume = useCallback(() => {
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
+    if (globalThis.window !== undefined && globalThis.speechSynthesis) {
       if (isPaused) {
-        window.speechSynthesis.resume();
+        globalThis.speechSynthesis.resume();
         setIsPaused(false);
       }
     }
@@ -139,8 +139,8 @@ export function useSpeechSynthesis(options: UseSpeechSynthesisOptions = {}) {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (typeof window !== 'undefined' && window.speechSynthesis) {
-        window.speechSynthesis.cancel();
+      if (globalThis.window !== undefined && globalThis.speechSynthesis) {
+        globalThis.speechSynthesis.cancel();
       }
     };
   }, []);

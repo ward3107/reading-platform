@@ -137,7 +137,7 @@ export function preprocessForTTS(
   // Abbreviations and symbols
   for (const [pattern, replacement] of ABBREVIATIONS) {
     if (typeof pattern === 'string') {
-      out = out.split(pattern).join(replacement);
+      out = out.replaceAll(pattern, replacement);
     } else {
       out = out.replace(pattern, replacement);
     }

@@ -9,25 +9,25 @@ interface StudentStoriesProps {
 }
 
 function StudentStories({ student, onRefresh }: StudentStoriesProps) {
-  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
-  const [filter, setFilter] = useState<'all' | 'level'>('all');
-  const [selectedDifficulty, setSelectedDifficulty] = useState<number>(student?.currentLevel || 1);
-  const [showAnswer, setShowAnswer] = useState<boolean>(false);
-  const [stories, setStories] = useState<Story[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [selectedStory, setSelectedStory] = useState<Story | null>(null); // selected story to display
+  const [filter, setFilter] = useState<'all' | 'level'>('all'); // filter to apply to the stories
+  const [selectedDifficulty, setSelectedDifficulty] = useState<number>(student?.currentLevel || 1); // selected difficulty to display
+  const [showAnswer, setShowAnswer] = useState<boolean>(false); // show answer to the selected story
+  const [stories, setStories] = useState<Story[]>([]); // stories to display
+  const [loading, setLoading] = useState<boolean>(true); // loading state
 
   // Load stories on mount
   useEffect(() => {
     const loadData = async () => {
-      setLoading(true);
+      setLoading(true); // set loading to true
       try {
         const loadedStories = await getStoriesWithQuestions();
-        setStories(loadedStories);
+        setStories(loadedStories); // set stories to the loaded stories
       } catch (error) {
         console.error('Error loading stories:', error);
-        setStories([]);
+        setStories([]); // set stories to an empty array
       } finally {
-        setLoading(false);
+        setLoading(false); // set loading to false
       }
     };
     loadData();
@@ -36,7 +36,7 @@ function StudentStories({ student, onRefresh }: StudentStoriesProps) {
   // Set default difficulty based on student level
   useEffect(() => {
     if (student?.currentLevel) {
-      setSelectedDifficulty(student.currentLevel);
+      setSelectedDifficulty(student.currentLevel); // set selected difficulty to the student's current level
     }
   }, [student?.currentLevel]);
 
@@ -48,27 +48,27 @@ function StudentStories({ student, onRefresh }: StudentStoriesProps) {
       return story.difficulty >= studentLevel - 1 && story.difficulty <= studentLevel + 1;
     }
     if (filter === 'level') {
-      return story.difficulty === selectedDifficulty;
+      return story.difficulty === selectedDifficulty; // return true if the story's difficulty is equal to the selected difficulty
     }
-    return true;
+    return true; // return true if the story's difficulty is not equal to the selected difficulty
   });
 
-  const storiesRead = student?.storiesRead || 0;
+  const storiesRead = student?.storiesRead || 0; // stories read by the student
 
   const handleStoryComplete = () => {
     // Would update student progress in Firestore
-    setSelectedStory(null);
-    setShowAnswer(false);
-    onRefresh();
+    setSelectedStory(null); // set selected story to null
+    setShowAnswer(false); // set show answer to false
+    onRefresh(); // refresh the stories list by calling the onRefresh function  
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600"></div> {/* loading spinner */}
         <p className="ml-4 text-gray-600">טוען סיפורים... / Loading stories...</p>
       </div>
-    );
+    ); // return the loading spinner and the text "טוען סיפורים... / Loading stories..."
   }
 
   if (selectedStory) {
@@ -77,7 +77,7 @@ function StudentStories({ student, onRefresh }: StudentStoriesProps) {
         story={selectedStory}
         onComplete={handleStoryComplete}
         onClose={() => {
-          setSelectedStory(null);
+          setSelectedStory(null); // set selected story to null
           setShowAnswer(false);
         }}
         showAnswer={showAnswer}
@@ -114,10 +114,11 @@ function StudentStories({ student, onRefresh }: StudentStoriesProps) {
       <div className="bg-white rounded-xl shadow p-4">
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="flex-1">
-            <label className="block text-gray-700 mb-2 text-sm font-medium">
+            <label htmlFor="filter-by" className="block text-gray-700 mb-2 text-sm font-medium">
               סינון לפי / Filter by
             </label>
             <select
+              id="filter-by"
               value={filter}
               onChange={(e) => setFilter(e.target.value as 'all' | 'level')}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -129,10 +130,11 @@ function StudentStories({ student, onRefresh }: StudentStoriesProps) {
 
           {filter === 'level' && (
             <div className="flex-1">
-              <label className="block text-gray-700 mb-2 text-sm font-medium">
+              <label htmlFor="difficulty-level" className="block text-gray-700 mb-2 text-sm font-medium">
                 רמה / Level
               </label>
               <select
+                id="difficulty-level"
                 value={selectedDifficulty}
                 onChange={(e) => setSelectedDifficulty(parseInt(e.target.value))}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
