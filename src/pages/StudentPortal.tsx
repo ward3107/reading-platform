@@ -112,7 +112,7 @@ function StudentPortal() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-cyan-50 to-teal-100" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 to-teal-100" dir="rtl">
       {/* Streak Warning */}
       {showStreakWarning && (
         <StreakWarning
@@ -254,7 +254,11 @@ function StudentPortal() {
       </button>
 
       {/* Main Content - on mobile/tablet: no sidebar; on lg: sidebar can collapse */}
-      <main className={`flex-1 min-h-screen lg:pt-0 pt-12 pb-20 lg:pb-6 px-4 lg:px-8 transition-all duration-300 overflow-y-auto ${sidebarCollapsed ? 'lg:pr-4' : 'lg:pr-[304px]'}`}>
+      <main
+        className={`lg:pt-0 pt-12 pb-20 lg:pb-6 px-4 lg:px-8 transition-all duration-300 ${
+          sidebarCollapsed ? 'lg:mr-0' : 'lg:mr-72'
+        }`}
+      >
         <div className="w-full py-6 lg:py-8">
           {currentPage === 'home' && (
             <StudentHome
