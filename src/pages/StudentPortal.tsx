@@ -159,7 +159,7 @@ function StudentPortal() {
         style={{
           width: sidebarCollapsed ? '0px' : '288px',
           transform: sidebarCollapsed ? 'translateX(100%)' : 'translateX(0)',
-          overflow: sidebarCollapsed ? 'hidden' : 'visible'
+          overflow: sidebarCollapsed ? 'hidden' : 'auto'
         }}
       >
         {/* Logo */}
