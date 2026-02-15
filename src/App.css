@@ -549,6 +549,7 @@ body {
 
 .overflow-hidden { overflow: hidden; }
 .overflow-auto { overflow: auto; }
+.overflow-y-auto { overflow-y: auto; }
 
 .cursor-pointer { cursor: pointer; }
 .pointer-events-none { pointer-events: none; }
